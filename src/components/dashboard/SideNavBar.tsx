@@ -3,28 +3,32 @@
 /**
  * AUTO PULSE — SideNavBar Component
  * Fixed left sidebar navigation (hidden on mobile)
- * Interactive navigation with active states
+ * Interactive navigation with active states + Translations
  */
 
 import Link from 'next/link';
 import { usePathname } from 'next/navigation';
+import { useLanguageTheme } from '@/contexts/LanguageThemeContext';
+import { useTranslation } from '@/lib/i18n/translations';
 
 export function SideNavBar() {
   const pathname = usePathname();
+  const { language } = useLanguageTheme();
+  const { t } = useTranslation(language);
 
   const navItems = [
-    { name: 'Home', href: '/', icon: 'home' },
-    { name: 'Explore', href: '/explore', icon: 'explore' },
-    { name: 'Compare', href: '/compare', icon: 'compare_arrows' },
-    { name: 'Saved', href: '/saved', icon: 'bookmark' },
-    { name: 'AI Insights', href: '/ai-insights', icon: 'psychology' },
+    { name: 'navHome', href: '/', icon: 'home' },
+    { name: 'navExplore', href: '/explore', icon: 'explore' },
+    { name: 'navCompare', href: '/compare', icon: 'compare_arrows' },
+    { name: 'navSaved', href: '/saved', icon: 'bookmark' },
+    { name: 'navAiInsights', href: '/ai-insights', icon: 'psychology' },
   ];
 
   return (
     <aside className="hidden md:flex fixed left-0 top-16 h-[calc(100vh-64px)] w-64 bg-background flex-col py-8 gap-4 z-40">
       <div className="px-6 mb-4">
         <h3 className="font-body text-xs font-medium uppercase tracking-widest text-primary-container">
-          Intelligence
+          {language === 'tr' ? 'İstihbarat' : 'Intelligence'}
         </h3>
         <p className="text-[10px] text-on-surface/40 uppercase tracking-tighter mt-1">
           v2.4 Live
@@ -46,7 +50,7 @@ export function SideNavBar() {
               <span className="material-symbols-outlined text-sm" data-icon={item.icon}>
                 {item.icon}
               </span>
-              {item.name}
+              {t(item.name as any)}
             </Link>
           );
         })}

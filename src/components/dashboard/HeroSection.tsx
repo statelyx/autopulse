@@ -3,13 +3,17 @@
 /**
  * AUTO PULSE — HeroSection Component
  * Main hero section with dramatic car image and AI search bar
- * From stitch/stitch/auto_pulse_dashboard/code.html
+ * From stitch/stitch/auto_pulse_dashboard/code.html + Translations
  */
 
 import { useState } from 'react';
+import { useLanguageTheme } from '@/contexts/LanguageThemeContext';
+import { useTranslation } from '@/lib/i18n/translations';
 
 export function HeroSection() {
   const [isSearchFocused, setIsSearchFocused] = useState(false);
+  const { language } = useLanguageTheme();
+  const { t } = useTranslation(language);
 
   return (
     <section className="relative h-[870px] w-full overflow-hidden flex flex-col items-center justify-center">
@@ -27,17 +31,22 @@ export function HeroSection() {
         <div className="inline-flex items-center gap-2 px-3 py-1 bg-surface-container-highest rounded-full border border-outline-variant/15 mb-6">
           <span className="w-2 h-2 rounded-full bg-secondary-fixed-dim shadow-[0_0_8px_#00dbe9]" />
           <span className="font-label text-[10px] uppercase tracking-[0.2em] text-on-surface-variant font-bold">
-            Live Telemetry Active
+            {t('heroLiveTelemetry')}
           </span>
         </div>
 
         <h1 className="font-headline text-5xl md:text-8xl font-black text-on-surface text-center leading-none tracking-tighter uppercase mb-4">
-          Pulse of the <span className="text-primary-container">Machine.</span>
+          {t('heroTitle').split(' ').map((word, i) =>
+            i === 2 ? (
+              <span key={i} className="text-primary-container">{word}</span>
+            ) : (
+              <span key={i}>{word} </span>
+            )
+          )}
         </h1>
 
         <p className="font-body text-on-surface-variant text-lg md:text-xl max-w-2xl text-center mb-12 font-light leading-relaxed">
-          Harness high-fidelity automotive intelligence. Real-time trend analysis,
-          predictive failure modeling, and cross-market price synthesis.
+          {t('heroSubtitle')}
         </p>
 
         {/* Premium AI Search Bar */}
@@ -49,11 +58,11 @@ export function HeroSection() {
             </span>
             <input
               className="w-full bg-transparent border-none text-on-surface font-body px-6 py-6 focus:ring-0 placeholder:text-on-surface-variant/40 placeholder:uppercase placeholder:tracking-widest placeholder:text-xs"
-              placeholder="Analyze Make, Model, or VIN..."
+              placeholder={t('heroSearchPlaceholder')}
               type="text"
             />
             <button className="mr-4 px-6 py-3 bg-primary-container text-on-primary-fixed font-headline font-bold uppercase text-xs rounded-lg hover:brightness-110 transition-all active:scale-95">
-              Synthesize
+              {language === 'tr' ? 'Analiz Et' : 'Synthesize'}
             </button>
           </div>
 

@@ -3,19 +3,24 @@
 /**
  * AUTO PULSE — TopNavBar Component
  * Fixed top navigation bar with backdrop blur
- * Interactive navigation with active states
+ * Interactive navigation with active states + Language/Theme controls
  */
 
 import Link from 'next/link';
 import { usePathname } from 'next/navigation';
+import { useLanguageTheme } from '@/contexts/LanguageThemeContext';
+import { useTranslation } from '@/lib/i18n/translations';
+import { LanguageThemeSwitcher } from '@/components/controls';
 
 export function TopNavBar() {
   const pathname = usePathname();
+  const { language } = useLanguageTheme();
+  const { t } = useTranslation(language);
 
   const navItems = [
-    { name: 'Home', href: '/' },
-    { name: 'Inventory', href: '/inventory' },
-    { name: 'Intelligence', href: '/intelligence' },
+    { name: 'navHome', href: '/' },
+    { name: 'navInventory', href: '/inventory' },
+    { name: 'navIntelligence', href: '/intelligence' },
   ];
 
   return (
@@ -37,18 +42,25 @@ export function TopNavBar() {
                     : 'text-on-surface/60 hover:text-primary-container'
                 }`}
               >
-                {item.name}
+                {t(item.name as any)}
               </Link>
             );
           })}
         </div>
       </div>
+
       <div className="flex items-center gap-4">
+        {/* Dil ve Tema Kontrolleri */}
+        <LanguageThemeSwitcher />
+
+        {/* Bildirimler */}
         <button className="p-2 text-on-surface/60 hover:text-primary-container transition-colors active:scale-95 duration-200">
           <span className="material-symbols-outlined" data-icon="notifications">
             notifications
           </span>
         </button>
+
+        {/* Hesap */}
         <Link href="/auth/login" className="p-2 text-on-surface/60 hover:text-primary-container transition-colors active:scale-95 duration-200">
           <span className="material-symbols-outlined" data-icon="account_circle">
             account_circle

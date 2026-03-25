@@ -95,3 +95,39 @@ body {
 ::-webkit-scrollbar-thumb:hover {
   background: #4a4949;
 }
+
+/* Light Mode */
+html:not(.dark) {
+  --color-background: #ffffff;
+  --color-surface: #f5f5f5;
+  --color-surface-container: #e8e8e8;
+  --color-surface-container-low: #ededed;
+  --color-surface-container-lowest: #ffffff;
+  --color-surface-container-high: #d4d4d4;
+  --color-surface-container-highest: #c4c4c4;
+  --color-on-surface: #1c1b1f;
+  --color-on-surface-variant: #49454f;
+  --color-on-background: #1c1b1f;
+  --color-outline-variant: #cac4d0;
+}
+
+html:not(.dark) body {
+  background-color: #ffffff;
+  color: #1c1b1f;
+}
+
+html:not(.dark) ::-webkit-scrollbar-track {
+  background: #f5f5f5;
+}
+
+html:not(.dark) ::-webkit-scrollbar-thumb {
+  background: #c4c4c4;
+}
+
+html:not(.dark) ::-webkit-scrollbar-thumb:hover {
+  background: #a0a0a0;
+}
+
+html:not(.dark) .glass-panel {
+  background: rgba(196, 196, 196, 0.4);
+}
