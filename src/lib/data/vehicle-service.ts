@@ -12,6 +12,28 @@ export interface VehicleBrand {
   source: string;
 }
 
+export interface Vehicle {
+  id: string;
+  brand: string;
+  brandSlug: string;
+  model: string;
+  year: number;
+  price?: number;
+  mileage?: number;
+  fuelType: 'Gasoline' | 'Diesel' | 'Electric' | 'Hybrid' | 'Plug-in Hybrid';
+  transmission: 'Automatic' | 'Manual' | 'CVT' | 'DSG' | 'PDK';
+  horsepower?: number;
+  acceleration?: number; // 0-100 km/h
+  topSpeed?: number; // km/h
+  bodyType: 'Sedan' | 'SUV' | 'Coupe' | 'Hatchback' | 'Convertible' | 'Truck' | 'Van' | 'Wagon';
+  doors: number;
+  seats: number;
+  color?: string;
+  description?: string;
+  features?: string[];
+  imageUrl?: string;
+}
+
 // Veriyi parse et ve cache'le
 let cachedBrands: VehicleBrand[] | null = null;
 
@@ -107,4 +129,475 @@ export function getProductionYears(): number[] {
     years.push(year);
   }
   return years;
+}
+
+/**
+ * Gerçek araç verileri (örnek)
+ */
+let cachedVehicles: Vehicle[] | null = null;
+
+export function getVehicles(filters?: {
+  brand?: string;
+  model?: string;
+  year?: number;
+  fuelType?: Vehicle['fuelType'];
+  bodyType?: Vehicle['bodyType'];
+}): Vehicle[] {
+  if (cachedVehicles) {
+    return filterVehicles(cachedVehicles, filters);
+  }
+
+  // Örnek gerçek araç verileri
+  const mockVehicles: Vehicle[] = [
+    // Porsche
+    {
+      id: 'porsche-911-2024',
+      brand: 'PORSCHE',
+      brandSlug: 'porsche',
+      model: '911 Carrera S',
+      year: 2024,
+      price: 185000,
+      mileage: 0,
+      fuelType: 'Gasoline',
+      transmission: 'PDK',
+      horsepower: 443,
+      acceleration: 3.5,
+      topSpeed: 308,
+      bodyType: 'Coupe',
+      doors: 2,
+      seats: 4,
+      color: 'GT Silver Metallic',
+      description: 'İkonik 911, mükemmel performans ve günlük kullanılabilirliğin dengesi.',
+      features: ['Sport Chrono Package', 'Bose Sound System', 'Navigation', 'Heated Seats'],
+    },
+    {
+      id: 'porsche-taycan-2024',
+      brand: 'PORSCHE',
+      brandSlug: 'porsche',
+      model: 'Taycan Turbo S',
+      year: 2024,
+      price: 195000,
+      mileage: 0,
+      fuelType: 'Electric',
+      transmission: 'Automatic',
+      horsepower: 750,
+      acceleration: 2.8,
+      topSpeed: 260,
+      bodyType: 'Sedan',
+      doors: 4,
+      seats: 4,
+      color: 'Frozen Berry Metallic',
+      description: 'Tamamen elektrikli Porsche, sıfır emisyon ve ultra hızlı şarj.',
+      features: ['Performance Battery Plus', 'Porsche Electric Sport Sound', 'Matrix LED Headlights'],
+    },
+    // BMW
+    {
+      id: 'bmw-m3-2024',
+      brand: 'BMW',
+      brandSlug: 'bmw',
+      model: 'M3 Competition',
+      year: 2024,
+      price: 95000,
+      mileage: 0,
+      fuelType: 'Gasoline',
+      transmission: 'Automatic',
+      horsepower: 503,
+      acceleration: 3.5,
+      topSpeed: 290,
+      bodyType: 'Sedan',
+      doors: 4,
+      seats: 5,
+      color: 'Isle of Man Green',
+      description: 'M3 Competition, pist performansını günlük yola getiriyor.',
+      features: ['M Driver\'s Package', 'Carbon Fiber Bucket Seats', 'M Sport Exhaust'],
+    },
+    {
+      id: 'bmw-ix-2024',
+      brand: 'BMW',
+      brandSlug: 'bmw',
+      model: 'iX xDrive50',
+      year: 2024,
+      price: 90000,
+      mileage: 0,
+      fuelType: 'Electric',
+      transmission: 'Automatic',
+      horsepower: 523,
+      acceleration: 4.6,
+      topSpeed: 200,
+      bodyType: 'SUV',
+      doors: 4,
+      seats: 5,
+      color: 'Phytonic Blue',
+      description: 'BMW\'nin tamamen elektrikli SUV\'u, uzun menzil ve lüks konfor.',
+      features: ['Glass Control', 'Curved Display', 'Bowers & Wilkins Sound System'],
+    },
+    // Mercedes-Benz
+    {
+      id: 'mercedes-amg-gt-2024',
+      brand: 'MERCEDES-BENZ',
+      brandSlug: 'mercedes-benz',
+      model: 'AMG GT',
+      year: 2024,
+      price: 140000,
+      mileage: 0,
+      fuelType: 'Gasoline',
+      transmission: 'Automatic',
+      horsepower: 577,
+      acceleration: 3.2,
+      topSpeed: 315,
+      bodyType: 'Coupe',
+      doors: 2,
+      seats: 4,
+      color: 'designo Diamond White Bright',
+      description: 'AMG GT, performans ve elegansın mükemmel birleşimi.',
+      features: ['AMG Performance Exhaust', 'AMG Track Pace', 'Burmester Sound System'],
+    },
+    // Tesla
+    {
+      id: 'tesla-model-s-2024',
+      brand: 'TESLA',
+      brandSlug: 'tesla',
+      model: 'Model S Plaid',
+      year: 2024,
+      price: 110000,
+      mileage: 0,
+      fuelType: 'Electric',
+      transmission: 'Automatic',
+      horsepower: 1020,
+      acceleration: 2.1,
+      topSpeed: 322,
+      bodyType: 'Sedan',
+      doors: 4,
+      seats: 5,
+      color: 'Red Multi-Coat',
+      description: 'Dünyanın en hızlı üretilen arabası, 3 motorlu tri-motor.',
+      features: ['Autopilot', 'Full Self-Driving Capability', 'Yoke Steering'],
+    },
+    {
+      id: 'tesla-model-y-2024',
+      brand: 'TESLA',
+      brandSlug: 'tesla',
+      model: 'Model Y Long Range',
+      year: 2024,
+      price: 52000,
+      mileage: 0,
+      fuelType: 'Electric',
+      transmission: 'Automatic',
+      horsepower: 460,
+      acceleration: 4.8,
+      topSpeed: 217,
+      bodyType: 'SUV',
+      doors: 4,
+      seats: 5,
+      color: 'Pearl White Multi-Coat',
+      description: 'En çok satan Tesla, pratiklik ve menzil dengesi.',
+      features: ['Autopilot', 'Premium Interior', 'Tow Hitch'],
+    },
+    // Ferrari
+    {
+      id: 'ferrari-f8-2024',
+      brand: 'FERRARI',
+      brandSlug: 'ferrari',
+      model: 'F8 Tributo',
+      year: 2024,
+      price: 280000,
+      mileage: 0,
+      fuelType: 'Gasoline',
+      transmission: 'Automatic',
+      horsepower: 710,
+      acceleration: 2.9,
+      topSpeed: 340,
+      bodyType: 'Coupe',
+      doors: 2,
+      seats: 2,
+      color: 'Rosso Corsa',
+      description: 'F8 Tributo, Ferrari\'nin V8 motorlu efsanesi.',
+      features: ['Carbon Fiber Driver Zone', 'Front Lift System', 'Premium Sound System'],
+    },
+    // Lamborghini
+    {
+      id: 'lamborghini-huracan-2024',
+      brand: 'LAMBORGHINI',
+      brandSlug: 'lamborghini',
+      model: 'Huracan EVO',
+      year: 2024,
+      price: 270000,
+      mileage: 0,
+      fuelType: 'Gasoline',
+      transmission: 'Automatic',
+      horsepower: 640,
+      acceleration: 2.9,
+      topSpeed: 325,
+      bodyType: 'Coupe',
+      doors: 2,
+      seats: 2,
+      color: 'Verde Mantis',
+      description: 'Huracan EVO, naturally aspirated V10 motor.',
+      features: ['Lamborghini Dinamica Veicolo Integrata', 'Magnetic Suspension', 'Apple CarPlay'],
+    },
+    // Audi
+    {
+      id: 'audi-r8-2024',
+      brand: 'AUDI',
+      brandSlug: 'audi',
+      model: 'R8 V10 Performance',
+      year: 2024,
+      price: 165000,
+      mileage: 0,
+      fuelType: 'Gasoline',
+      transmission: 'Automatic',
+      horsepower: 602,
+      acceleration: 3.1,
+      topSpeed: 330,
+      bodyType: 'Coupe',
+      doors: 2,
+      seats: 2,
+      color: 'Mythos Black',
+      description: 'R8 V10, Audi\'nin bayrak gemisi.',
+      features: ['Quattro AWD', 'Bang & Olufsen Sound', 'Audi Virtual Cockpit'],
+    },
+    {
+      id: 'audi-etron-gt-2024',
+      brand: 'AUDI',
+      brandSlug: 'audi',
+      model: 'e-tron GT',
+      year: 2024,
+      price: 105000,
+      mileage: 0,
+      fuelType: 'Electric',
+      transmission: 'Automatic',
+      horsepower: 522,
+      acceleration: 3.9,
+      topSpeed: 250,
+      bodyType: 'Sedan',
+      doors: 4,
+      seats: 5,
+      color: 'Tactical Green',
+      description: 'Tamamen elektrikli gran turismo.',
+      features: ['Matrix LED Headlights', 'Quattro AWD', 'Bang & Olufsen Premium Sound'],
+    },
+    // Toyota
+    {
+      id: 'toyota-supra-2024',
+      brand: 'TOYOTA',
+      brandSlug: 'toyota',
+      model: 'GR Supra',
+      year: 2024,
+      price: 58000,
+      mileage: 0,
+      fuelType: 'Gasoline',
+      transmission: 'Automatic',
+      horsepower: 382,
+      acceleration: 3.9,
+      topSpeed: 250,
+      bodyType: 'Coupe',
+      doors: 2,
+      seats: 2,
+      color: 'Stratosphere Blue',
+      description: 'GR Supra, drifting için tasarlandı.',
+      features: ['Performance Exhaust', 'Navigation', 'JBL Sound System'],
+    },
+    {
+      id: 'toyota-rav4-2024',
+      brand: 'TOYOTA',
+      brandSlug: 'toyota',
+      model: 'RAV4 Hybrid',
+      year: 2024,
+      price: 33000,
+      mileage: 0,
+      fuelType: 'Hybrid',
+      transmission: 'Automatic',
+      horsepower: 219,
+      acceleration: 7.8,
+      topSpeed: 180,
+      bodyType: 'SUV',
+      doors: 4,
+      seats: 5,
+      color: 'Celestial Silver',
+      description: 'En çok satan hybrid SUV.',
+      features: ['Toyota Safety Sense', 'Panoramic Roof', 'Wireless Charging'],
+    },
+    // Honda
+    {
+      id: 'honda-civic-2024',
+      brand: 'HONDA',
+      brandSlug: 'honda',
+      model: 'Civic Type R',
+      year: 2024,
+      price: 45000,
+      mileage: 0,
+      fuelType: 'Gasoline',
+      transmission: 'Manual',
+      horsepower: 315,
+      acceleration: 4.9,
+      topSpeed: 275,
+      bodyType: 'Hatchback',
+      doors: 4,
+      seats: 5,
+      color: 'Championship White',
+      description: 'FWD hot hatch kralı.',
+      features: ['Brembo Brakes', 'Honda LogR Data Logger', 'Bose Sound System'],
+    },
+    // Ford
+    {
+      id: 'ford-mustang-2024',
+      brand: 'FORD',
+      brandSlug: 'ford',
+      model: 'Mustang Dark Horse',
+      year: 2024,
+      price: 62000,
+      mileage: 0,
+      fuelType: 'Gasoline',
+      transmission: 'Manual',
+      horsepower: 500,
+      acceleration: 4.1,
+      topSpeed: 270,
+      bodyType: 'Coupe',
+      doors: 2,
+      seats: 4,
+      color: 'Blue Ember Metallic',
+      description: 'Mustang Dark Horse, track-ready performance.',
+      features: ['Performance Package', 'Brembo Brakes', 'Active Valve Exhaust'],
+    },
+    // Chevrolet
+    {
+      id: 'chevrolet-corvette-2024',
+      brand: 'CHEVROLET',
+      brandSlug: 'chevrolet',
+      model: 'Corvette E-Ray',
+      year: 2024,
+      price: 110000,
+      mileage: 0,
+      fuelType: 'Hybrid',
+      transmission: 'Automatic',
+      horsepower: 655,
+      acceleration: 2.5,
+      topSpeed: 290,
+      bodyType: 'Coupe',
+      doors: 2,
+      seats: 2,
+      color: 'Hyper Green',
+      description: 'İlk hibrit Corvette, elektrik destekli performans.',
+      features: ['Z51 Performance Package', 'Front Lift', 'Bose Performance System'],
+    },
+    // Hyundai
+    {
+      id: 'hyundai-ioniq5-2024',
+      brand: 'HYUNDAI',
+      brandSlug: 'hyundai',
+      model: 'Ioniq 5 Limited',
+      year: 2024,
+      price: 52000,
+      mileage: 0,
+      fuelType: 'Electric',
+      transmission: 'Automatic',
+      horsepower: 320,
+      acceleration: 4.5,
+      topSpeed: 185,
+      bodyType: 'SUV',
+      doors: 4,
+      seats: 5,
+      color: 'Digital Teal',
+      description: 'Retro-futuristik tasarım, ultra hızlı DC şarj.',
+      features: ['Vehicle-to-Load', 'Holographic Rear View Mirror', 'Premium Sound'],
+    },
+    // Kia
+    {
+      id: 'kia-ev6-2024',
+      brand: 'KIA',
+      brandSlug: 'kia',
+      model: 'EV6 GT',
+      year: 2024,
+      price: 63000,
+      mileage: 0,
+      fuelType: 'Electric',
+      transmission: 'Automatic',
+      horsepower: 576,
+      acceleration: 3.4,
+      topSpeed: 260,
+      bodyType: 'SUV',
+      doors: 4,
+      seats: 5,
+      color: 'Yacht Blue',
+      description: 'Kia\'nin performans elektrikli SUV\'u.',
+      features: ['GT Mode', '21" Wheels', 'Meridian Sound System'],
+    },
+    // Volvo
+    {
+      id: 'volvo-xc90-2024',
+      brand: 'VOLVO',
+      brandSlug: 'volvo',
+      model: 'XC90 T8 AWD',
+      year: 2024,
+      price: 75000,
+      mileage: 0,
+      fuelType: 'Plug-in Hybrid',
+      transmission: 'Automatic',
+      horsepower: 455,
+      acceleration: 5.0,
+      topSpeed: 230,
+      bodyType: 'SUV',
+      doors: 4,
+      seats: 7,
+      color: 'Onyx Black',
+      description: 'Lüks 7 kişilik plug-in hybrid SUV.',
+      features: ['Bowers & Wilkins Sound', 'Nappa Leather', 'Orrefors Crystal Gear Shifter'],
+    },
+    // Nissan
+    {
+      id: 'nissan-gtr-2024',
+      brand: 'NISSAN',
+      brandSlug: 'nissan',
+      model: 'GT-R NISMO',
+      year: 2024,
+      price: 125000,
+      mileage: 0,
+      fuelType: 'Gasoline',
+      transmission: 'Automatic',
+      horsepower: 600,
+      acceleration: 2.7,
+      topSpeed: 315,
+      bodyType: 'Coupe',
+      doors: 2,
+      seats: 4,
+      color: 'Bayside Blue',
+      description: 'Godzilla returns, NISMO tuned.',
+      features: ['Carbon Fiber Spoiler', 'Recaro Seats', 'NISMO-tuned Suspension'],
+    },
+  ];
+
+  cachedVehicles = mockVehicles;
+  return filterVehicles(mockVehicles, filters);
+}
+
+function filterVehicles(vehicles: Vehicle[], filters?: {
+  brand?: string;
+  model?: string;
+  year?: number;
+  fuelType?: Vehicle['fuelType'];
+  bodyType?: Vehicle['bodyType'];
+}): Vehicle[] {
+  if (!filters) return vehicles;
+
+  return vehicles.filter(vehicle => {
+    if (filters.brand && vehicle.brandSlug !== filters.brand) return false;
+    if (filters.model && !vehicle.model.toLowerCase().includes(filters.model.toLowerCase())) return false;
+    if (filters.year && vehicle.year !== filters.year) return false;
+    if (filters.fuelType && vehicle.fuelType !== filters.fuelType) return false;
+    if (filters.bodyType && vehicle.bodyType !== filters.bodyType) return false;
+    return true;
+  });
+}
+
+export function getVehicleById(id: string): Vehicle | undefined {
+  const vehicles = getVehicles();
+  return vehicles.find(v => v.id === id);
+}
+
+export function getVehiclesByBrand(brandSlug: string): Vehicle[] {
+  return getVehicles({ brand: brandSlug });
+}
+
+export function getVehiclesByModel(model: string): Vehicle[] {
+  return getVehicles({ model });
 }
