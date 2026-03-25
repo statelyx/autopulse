@@ -24,8 +24,9 @@
 | 6 | Veri Kaynakları / Normalization / vehiclesdata.txt Entegrasyonu | 25.03.2026 | 25.03.2026 | ✅ Tamamlandı |
 | 7 | Etkileşim / Route / Tüm Butonlar Aktif | 25.03.2026 | 25.03.2026 | ✅ Tamamlandı |
 | 8 | Dil Sistemi / TR-EN Butonu / Light-Dark Tema | 25.03.2026 | 25.03.2026 | ✅ Tamamlandı |
-| 9 | Arama & Filtreleme Sistemi | — | — | ⏳ Bekliyor |
-| 10 | Araç Detay Sayfaları | — | — | ⏳ Bekliyor |
+| 9 | Supabase Marka Verisi / Tüm Markalar Aktif Getirme | 25.03.2026 | 25.03.2026 | ✅ Tamamlandı |
+| 10 | Marka-Model-Yıl Akışı / Supabase Bağlantısı | 25.03.2026 | 25.03.2026 | ✅ Tamamlandı |
+| 11 | Araç Detay Sayfaları | — | — | ⏳ Bekliyor |
 | 11 | AI Entegrasyonu | — | — | ⏳ Bekliyor |
 | 12 | Kullanıcı Yorumları | — | — | ⏳ Bekliyor |
 | 13 | Performans Optimizasyonu | — | — | ⏳ Bekliyor |
@@ -941,6 +942,127 @@ src/app/
 - ✅ Explore page'de tüm markalar listeleniyor
 - ✅ QuickAccessGrid'te ilk 18 marka
 - ✅ İstatistik panelinde toplam sayılar
+
+---
+
+*Sonraki faz notları buraya eklenecektir.*
+
+## Faz 10 — Marka-Model-Yıl Akışı / Supabase Bağlantısı
+
+**Tarih:** 25 Mart 2026
+**Amaç:** Marka > Model > Yıl cascade akışı tam çalışır hale getirmek.
+
+### Yapılanlar
+
+#### 1. FilterSection Tam Akış
+- [x] Marka seçilince model dropdown aktif
+- [x] Model seçilince yıl dropdown aktif
+- [x] Marka seçilmezse model pasif (disabled)
+- [x] Model seçilmezse yıl pasif (disabled)
+- [x] Yıl range slider yerine dropdown (1990-2026)
+- [x] Search butonu (sadece yıl seçiliyse aktif)
+- [x] State management (selectedBrand, selectedModel, selectedYear)
+
+#### 2. Vehicle Service Güncellemesi
+- [x] `getProductionYears()` fonksiyonu eklendi
+- [x] 1990-2026 arası yıllar (tersten sıralı)
+- [x] FilterState interface for state sharing
+
+#### 3. State Yönetimi
+- [x] Marka değişince model ve yıl reset
+- [x] Model değişince yıl reset
+- [x] FilterState objesi (brand, model, year)
+- [x] Diğer bileşenlere taşınabilir hale
+
+### Marka-Model-Yıl Akışı
+
+```
+Kullanıcı Marka Seçer
+        ↓
+selectedBrand set edilir
+        ↓
+useEffect tetiklenir → modeller yüklenir
+        ↓
+Model dropdown aktif olur
+        ↓
+Kullanıcı Model Seçer
+        ↓
+selectedModel set edilir
+        ↓
+useEffect tetiklenir → yıl reset
+        ↓
+Yıl dropdown aktif olur
+        ↓
+Kullanıcı Yıl Seçer
+        ↓
+selectedYear set edilir
+        ↓
+Search butonu aktif olur
+```
+
+### UX İyileştirmeleri
+
+**Disabled State Mesajları:**
+- Marka yok: "Önce Marka Seç" / "Select Make First"
+- Model yok: "Önce Model Seç" / "Select Model First"
+- Yıl yok: "Yıl Seç" / "Select Year"
+
+**Görsel Feedback:**
+- Disabled dropdown'lar opacity 50%
+- Disabled butonlar cursor not-allowed
+- Aktif dropdown'lar focus ring ile
+
+### Değişen Dosyalar
+```
+src/lib/data/
+└── vehicle-service.ts         # GÜNCELLENDİ - getProductionYears()
+
+src/components/dashboard/
+└── FilterSection.tsx          # GÜNCELLENDİ - Full cascade akış
+```
+
+### Commit Bilgileri
+**Commit:** `1fec3e6`
+**Mesaj:** faz-10: marka-model-yıl akışı ve supabase bağlantısı
+**Değişen Dosyalar:** 3 dosya
+**Satır Eklendi:** +201 insertions
+**Satır Silindi:** -26 deletions
+
+### Build Durumu
+```bash
+✓ Compiled successfully
+✓ Running TypeScript
+✓ Collecting page data
+✓ Generating static pages (17 routes)
+```
+
+### Kullanıcı Deneyimi
+
+**Önce:**
+- Marka > Model cascade çalışıyor
+- Year range slider var
+
+**Şimdi:**
+- Marka > Model > Yıl tam cascade
+- Yıl dropdown (1990-2026)
+- Disabled state UX
+- Search butonu aktiflik kontrolü
+
+**Özellikler:**
+- ✅ Marka seçince model dropdown aktif
+- ✅ Model seçince yıl dropdown aktif
+- ✅ Marka değişince alt seçimler reset
+- ✅ 1990-2026 yılları dropdown'ta
+- ✅ Search butonu sadece yıl seçiliyse aktif
+- ✅ FilterState objesi ile state paylaşımı
+
+### Supabase Hazırlığı
+
+**Not:** Bu fazda veri hala vehiclesdata.txt'ten okunuyor.
+Gelecek fazlarda Supabase entegrasyonu için:
+- State yap hazır (FilterState)
+- Akış mantık hazır
+- Component yapısı uyumlu
 
 ---
 
