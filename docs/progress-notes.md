@@ -29,7 +29,7 @@
 | 11 | Logo Verisi / Seçimde Doğru Logo Gösterme | 25.03.2026 | 25.03.2026 | ✅ Tamamlandı |
 | 12 | Gerçek Veri Entegrasyonu / Inventory & Vehicle Detail | 25.03.2026 | 25.03.2026 | ✅ Tamamlandı |
 | 13 | Saved / Compare / AI Insights / İşlevsel Modüller | 25.03.2026 | 25.03.2026 | ✅ Tamamlandı |
-| 14 | AI Entegrasyonu | — | — | ⏳ Bekliyor |
+| 14 | Hugging Face AI / Issue & Insight Akışı | 25.03.2026 | 25.03.2026 | ✅ Tamamlandı |
 | 15 | Kullanıcı Yorumları | — | — | ⏳ Bekliyor |
 | 16 | Performans Optimizasyonu | — | — | ⏳ Bekliyor |
 | 17 | SEO & Meta Veriler | — | — | ⏳ Bekliyor |
@@ -1774,6 +1774,278 @@ Vehicle Detail sayfasına yönlendirme
 - [ ] Share comparison links
 - [ ] AI chat interface
 - [ ] Price prediction models
+
+---
+
+## Faz 14 — Hugging Face AI / Issue ve Insight Akışı
+
+**Tarih:** 25 Mart 2026
+**Amaç:** Hugging Face AI anahtarlarını kullanarak AI servis katmanını gerçek modüler yapıya bağlamak.
+
+### Yapılanlar
+- [x] AI servis yapısı oluşturuldu (types, providers, analyzers, prompts)
+- [x] Hugging Face provider implementasyonu
+- [x] Analyzer servisleri bağlandı (sentiment, tagging, clustering)
+- [x] Issues sayfasına AI veri akışı eklendi
+- [x] AI Insights sayfası gerçek AI ile güncellendi
+- [x] AI strateji dokümantasyonu oluşturuldu
+
+### Dosyalar
+
+**Yeni Dosyalar:**
+- `src/lib/ai/types.ts` — AI tipleri ve arayüzler
+- `src/lib/ai/providers/huggingface.ts` — Hugging Face API provider
+- `src/lib/ai/analyzers/issue-analyzer.ts` — Issue analizi ve clustering
+- `src/lib/ai/analyzers/vehicle-analyzer.ts` — Vehicle insights
+- `src/lib/ai/prompts/index.ts` — Prompt şablonları
+- `src/lib/ai/index.ts` — AI servis singleton
+- `docs/ai-strategy.md` — AI strateji dokümantasyonu
+
+**Güncellenen Dosyalar:**
+- `src/app/issues/page.tsx` — AI analizi ile entegre edildi
+- `src/app/ai-insights/page.tsx` — Gerçek AI ile güncellendi
+
+### Teknik Detaylar
+
+#### 1. AI Servis Yapısı
+
+```
+src/lib/ai/
+├── types.ts              # Tüm AI tipleri ve arayüzler
+├── index.ts              # Ana export noktası ve AI servis singleton
+├── providers/
+│   └── huggingface.ts   # Hugging Face API implementasyonu
+├── analyzers/
+│   ├── issue-analyzer.ts # Issue analizi ve clustering
+│   └── vehicle-analyzer.ts # Vehicle insights ve karşılaştırma
+└── prompts/
+    └── index.ts          # Prompt şablonları
+```
+
+#### 2. Hugging Face Provider
+
+**Kullanılan Modeller:**
+- **Sentiment Analysis:** `distilbert-base-uncased-finetuned-sst-2-english`
+- **Zero-Shot Classification:** `facebook/bart-large-mnli`
+- **Summarization:** `facebook/bart-large-cnn`
+- **Feature Extraction:** `sentence-transformers/all-MiniLM-L6-v2`
+
+**Fallback Mekanizmaları:**
+- Keyword bazlı sentiment analizi
+- Keyword eşleşme bazlı sınıflandırma
+- İlk 200 karakter kırpma (summarization)
+- Sıfır vektör (feature extraction)
+
+#### 3. Issue Analyzer
+
+**Özellikler:**
+- Issue sentiment analizi (positive/negative/neutral)
+- Issue kategorizasyonu (performance, ui/ux, bug, feature, security, data)
+- Öncelik belirleme (high/medium/low)
+- Issue özetleme
+- Anahtar kelime çıkarma
+- Issue clustering (cosine similarity)
+
+**Kullanım:**
+```typescript
+import { aiService } from '@/lib/ai';
+
+// Tek issue analizi
+const analysis = await aiService.analyzeIssue({
+  title: 'Navigation system crashes',
+  description: 'The nav system crashes intermittently...',
+  category: 'bug'
+});
+// {
+//   sentiment: { label: 'negative', score: 0.89 },
+//   category: { label: 'bug', score: 0.92 },
+//   priority: 'high',
+//   summary: 'Navigation system experiences intermittent crashes...',
+//   keywords: ['navigation', 'crashes', 'intermittent']
+// }
+
+// Çoklu issue analizi
+const analyses = await aiService.analyzeMultipleIssues(issues);
+
+// Issue clustering
+const clusters = await aiService.clusterIssues(issues);
+// Map: { 'cluster-1': [0, 3, 7], 'cluster-2': [1, 4], ... }
+```
+
+#### 4. Vehicle Analyzer
+
+**Özellikler:**
+- Market insight generasyonu
+- Vehicle karşılaştırma
+- Fiyat trendi tahmini
+- Performans analizi
+- Elektrikli araç pazar analizi
+
+**Kullanım:**
+```typescript
+import { aiService } from '@/lib/ai';
+
+// Market insights
+const insights = await aiService.generateMarketInsight(vehicles);
+// [
+//   { id: '...', type: 'market', title: '...', summary: '...', confidence: 85, ... },
+//   { id: '...', type: 'performance', title: '...', summary: '...', confidence: 90, ... }
+// ]
+
+// Vehicle karşılaştırma
+const comparison = await aiService.compareVehicles(vehicle1, vehicle2);
+// "Porsche 911 is 50hp more powerful and accelerates 0.5s faster..."
+
+// Fiyat trendi
+const trend = await aiService.predictPriceTrend(vehicles);
+```
+
+**Insight Tipleri:**
+- `market`: Pazar analizi
+- `technical`: Teknik analiz
+- `performance`: Performans analizi
+- `price`: Fiyat analizi
+- `trend`: Trend tahmini
+
+#### 5. Issues Sayfası Entegrasyonu
+
+**Veri Akışı:**
+```
+Issues Page
+    ↓
+aiService.analyzeIssue() / analyzeMultipleIssues()
+    ↓
+Hugging Face API
+    ↓
+IssueAnalysis { sentiment, category, priority, summary, keywords }
+    ↓
+UI Rendering (Sentiment icon, Priority badge, Summary, Keywords)
+```
+
+**Gösterilen Bilgiler:**
+- Sentiment skoru (positive/negative/neutral)
+- Category (performance, ui/ux, bug, feature, security, data)
+- Priority (high/medium/low)
+- AI özeti
+- Anahtar kelimeler
+- Confidence skoru
+
+**Sample Issues:**
+- Navigation system crashes (ui/ux)
+- Range estimation inaccurate (data)
+- Transmission delay (performance)
+- Feature request: Dark mode (feature)
+- Security vulnerability (security)
+
+#### 6. AI Insights Sayfası Entegrasyonu
+
+**Veri Akışı:**
+```
+AI Insights Page
+    ↓
+aiService.generateMarketInsight(vehicles)
+    ↓
+VehicleAnalyzer
+    ↓
+VehicleInsight[] { type, title, summary, confidence, relatedVehicles, impact }
+    ↓
+UI Rendering (Insight kartları, Vehicle badges, Confidence, Impact)
+```
+
+**Gösterilen Bilgiler:**
+- Insight tipi (market, technical, performance, price, trend)
+- Confidence skoru
+- İlgili araçlar (marka logoları ile)
+- Impact seviyesi (high/medium/low)
+- Araç istatistikleri (ortalama güç, hız, fiyat)
+
+**AI Insights:**
+- Elektrikli Araç Pazar Analizi (EV oranı, markalar)
+- Yüksek Performans Segmenti (500+ hp araçlar)
+- Fiyat Segmenti Analizi (ortalama fiyat, lüks araçlar)
+- Yakıt Türü Dağılımı
+
+### AI Özellikleri
+
+**Sentiment Analizi:**
+- Positive/Negative/Neutral sınıflandırması
+- Confidence skoru (0-1)
+- Keyword bazlı fallback
+
+**Zero-Shot Classification:**
+- Custom label desteği
+- Issue kategorizasyonu
+- Vehicle sınıflandırması
+- Keyword bazlı fallback
+
+**Text Summarization:**
+- Uzun metin özetleme
+- Review özetleri
+- Issue özetleri
+- İlk 200 karakter fallback
+
+**Feature Extraction:**
+- 384 boyutlu vektör
+- Issue clustering
+- Cosine similarity
+- Sıfır vektör fallback
+
+### Kullanıcı Deneyimi
+
+**Önce (Faz 13):**
+- Issues sayfası placeholder
+- AI Insights statik/hardcoded veri
+- Gerçek AI entegrasyonu yok
+
+**Şimdi (Faz 14):**
+- Issues sayfası AI analizi ile çalışıyor
+- AI Insights gerçek AI ile güncel
+- Sentiment, category, priority analizi
+- Issue clustering
+- Market insights generasyonu
+- Vehicle comparison
+- Price trend prediction
+- Fallback mekanizmaları
+
+**Özellikler:**
+- ✅ Hugging Face AI entegrasyonu
+- ✅ Sentiment analizi
+- ✅ Zero-shot classification
+- ✅ Text summarization
+- ✅ Feature extraction
+- ✅ Issue clustering
+- ✅ Market insights
+- ✅ Vehicle comparison
+- ✅ Price trend prediction
+- ✅ Fallback mekanizmaları
+- ✅ AI strategy dokümantasyonu
+
+### Kod İstatistikleri
+
+**Değişiklikler:**
+- 9 dosya değişti
+- 1570 satır eklendi
+- 166 satır silindi
+
+**Build Durumu:**
+```bash
+✓ Type Check: Başarılı
+✓ Build: 18 routes
+✓ Git Commit: 1948964
+✓ Git Push: origin/main
+```
+
+### Gelecek Geliştirmeler
+
+- [ ] Custom model fine-tuning
+- [ ] Multilingual support (TR/EN)
+- [ ] Real-time streaming responses
+- [ ] Image analysis (vehicle photos)
+- [ ] Voice input support
+- [ ] User preference learning
+- [ ] Personalized recommendations
+- [ ] Advanced clustering algorithms
+- [ ] AI chat interface
 
 ---
 
