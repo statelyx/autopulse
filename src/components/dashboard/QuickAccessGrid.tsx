@@ -9,17 +9,23 @@ import { useState, useEffect } from 'react';
 import { useLanguageTheme } from '@/contexts/LanguageThemeContext';
 import { useTranslation } from '@/lib/i18n/translations';
 import { getVehicleBrands } from '@/lib/data/vehicle-service';
+import { getBrandLogo } from '@/lib/data/logo-service';
 import Link from 'next/link';
+import Image from 'next/image';
 
 export function QuickAccessGrid() {
   const { language } = useLanguageTheme();
   const { t } = useTranslation(language);
-  const [displayBrands, setDisplayBrands] = useState<Array<{name: string; slug: string}>>([]);
+  const [displayBrands, setDisplayBrands] = useState<Array<{name: string; slug: string; logoPath: string}>>([]);
 
   useEffect(() => {
     // İlk 18 markayı göster
     const allBrands = getVehicleBrands();
-    setDisplayBrands(allBrands.slice(0, 18));
+    const brandsWithLogos = allBrands.slice(0, 18).map(brand => ({
+      ...brand,
+      logoPath: getBrandLogo(brand.slug),
+    }));
+    setDisplayBrands(brandsWithLogos);
   }, []);
 
   return (
@@ -45,8 +51,23 @@ export function QuickAccessGrid() {
           >
             <div className="h-24 bg-surface-container rounded-xl flex items-center justify-center border border-outline-variant/5 group-hover:bg-surface-container-high group-hover:border-primary-container/20 transition-all duration-300 relative overflow-hidden">
               <div className="absolute inset-0 bg-primary-container/5 opacity-0 group-hover:opacity-100 transition-opacity" />
+              {/* Brand Logo */}
+              <Image
+                src={brand.logoPath}
+                alt={brand.name}
+                width={48}
+                height={48}
+                className="relative z-10 w-12 h-12 object-contain group-hover:scale-110 transition-transform"
+                onError={(e) => {
+                  // Fallback to icon if logo fails
+                  const target = e.target as HTMLImageElement;
+                  target.style.display = 'none';
+                  const icon = target.parentElement?.querySelector('.material-symbols-outlined');
+                  if (icon) (icon as HTMLElement).style.display = 'block';
+                }}
+              />
               <span
-                className="material-symbols-outlined text-4xl text-on-surface-variant group-hover:text-primary transition-colors"
+                className="material-symbols-outlined text-4xl text-on-surface-variant group-hover:text-primary transition-colors hidden"
                 data-icon="directions_car"
               >
                 directions_car

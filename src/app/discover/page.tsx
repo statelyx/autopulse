@@ -11,6 +11,8 @@ import { useTranslation } from '@/lib/i18n/translations';
 import Link from 'next/link';
 import { useState, useMemo } from 'react';
 import { getVehicleBrands } from '@/lib/data/vehicle-service';
+import { getBrandLogo } from '@/lib/data/logo-service';
+import Image from 'next/image';
 
 export default function ExplorePage() {
   const { language } = useLanguageTheme();
@@ -18,7 +20,13 @@ export default function ExplorePage() {
   const [selectedCategory, setSelectedCategory] = useState<string>('all');
 
   // Gerçek marka verisini yükle
-  const allBrands = useMemo(() => getVehicleBrands(), []);
+  const allBrands = useMemo(() => {
+    const brands = getVehicleBrands();
+    return brands.map(brand => ({
+      ...brand,
+      logoPath: getBrandLogo(brand.slug),
+    }));
+  }, []);
 
   const categories = [
     { id: 'all', name: language === 'tr' ? 'Tüm Markalar' : 'All Brands', icon: 'grid_view' },
@@ -119,7 +127,7 @@ export default function ExplorePage() {
 
           {/* Brands Grid */}
           <div className="grid grid-cols-2 md:grid-cols-4 lg:grid-cols-6 gap-6">
-            {filteredBrands.map((brand) => (
+            {filteredBrands.map((brand: any) => (
               <Link
                 key={brand.slug}
                 href={`/inventory?brand=${brand.slug}`}
@@ -127,7 +135,25 @@ export default function ExplorePage() {
               >
                 <div className="h-32 bg-surface-container rounded-xl flex flex-col items-center justify-center border border-outline-variant/5 group-hover:bg-surface-container-high group-hover:border-primary-container/20 transition-all duration-300 relative overflow-hidden p-4">
                   <div className="absolute inset-0 bg-primary-container/5 opacity-0 group-hover:opacity-100 transition-opacity" />
-                  <span className="material-symbols-outlined text-4xl text-on-surface-variant group-hover:text-primary transition-colors z-10">
+                  {/* Brand Logo */}
+                  <Image
+                    src={brand.logoPath}
+                    alt={brand.name}
+                    width={64}
+                    height={64}
+                    className="relative z-10 w-16 h-16 object-contain group-hover:scale-110 transition-transform"
+                    onError={(e) => {
+                      // Fallback to icon if logo fails
+                      const target = e.target as HTMLImageElement;
+                      target.style.display = 'none';
+                      const icon = target.parentElement?.querySelector('.material-symbols-outlined');
+                      if (icon) {
+                        (icon as HTMLElement).style.display = 'block';
+                        (icon as HTMLElement).classList.add('z-10');
+                      }
+                    }}
+                  />
+                  <span className="material-symbols-outlined text-4xl text-on-surface-variant group-hover:text-primary transition-colors z-10 hidden">
                     directions_car
                   </span>
                   <p className="text-center font-label text-[10px] uppercase tracking-widest text-on-surface group-hover:text-primary transition-colors z-10 mt-2">
