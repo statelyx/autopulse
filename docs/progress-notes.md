@@ -1253,3 +1253,231 @@ docs/
 ---
 
 *Sonraki faz notları buraya eklenecektir.*
+
+## Faz 12 — Vehicle Detail / Inventory / Explore Gerçek Veri Bağlantısı
+
+**Tarih:** 25 Mart 2026
+**Amaç:** Inventory, Explore ve Vehicle Detail alanlarını gerçek araç verisiyle bağlamak.
+
+### Yapılanlar
+
+#### 1. Vehicle Data Service Genişletme
+- [x] Vehicle interface oluşturuldu
+- [x] 17 gerçek araç verisi eklendi (Tesla, Porsche, BMW, Ferrari vb.)
+- [x] getVehicles() fonksiyonu - filtreleme desteği
+- [x] getVehicleById() - ID ile araç bulma
+- [x] getVehiclesByBrand() - Marka filtreleme
+- [x] getVehiclesByModel() - Model filtreleme
+
+#### 2. Inventory Sayfası Gerçek Veri Bağlantısı
+- [x] Gerçek araç listesi gösterimi
+- [x] Marka filtreleme (URL param: ?brand=)
+- [x] Loading state (skeleton)
+- [x] Empty state (araç bulunamadı)
+- [x] Araç kartları - logo, marka, model, specs, fiyat
+- [x] Vehicle detail sayfasına link
+
+#### 3. Vehicle Detail Sayfası Oluşturma
+- [x] /vehicle/[id] dinamik route
+- [x] Gerçek araç detayları gösterimi
+- [x] Teknik özellikler (hp, hız, şanzıman, yakıt vb.)
+- [x] Logo + marka/model bilgisi
+- [x] Save butonu aktif (localStorage mock)
+- [x] Compare butonu aktif
+- [x] Back to Inventory link
+- [x] Error state (araç bulunamadı)
+
+#### 4. Explore Entegrasyonu
+- [x] Marka kartlarına tıklayınca filtreli inventory
+- [x] URL param ile marka filtreleme aktif
+
+### Veri Akışı
+
+```
+Explore (Marka Seç)
+        ↓
+/inventory?brand=porsche
+        ↓
+Vehicle Listesi (Porsche araçları)
+        ↓
+Araç Kartına Tıkla
+        ↓
+/vehicle/porsche-911-2024
+        ↓
+Vehicle Detail (Tam detaylar)
+```
+
+### Vehicle Interface
+
+```typescript
+interface Vehicle {
+  id: string;
+  brand: string;
+  brandSlug: string;
+  model: string;
+  year: number;
+  price?: number;
+  fuelType: 'Gasoline' | 'Diesel' | 'Electric' | 'Hybrid';
+  transmission: 'Automatic' | 'Manual' | 'PDK';
+  horsepower?: number;
+  acceleration?: number; // 0-100 km/h
+  topSpeed?: number;
+  bodyType: 'Sedan' | 'SUV' | 'Coupe';
+  doors: number;
+  seats: number;
+  description?: string;
+  features?: string[];
+}
+```
+
+### Mevcut Araç Verileri (17 Araç)
+
+**Performans:**
+- Porsche 911 Carrera S (2024)
+- Ferrari F8 Tributo (2024)
+- Lamborghini Huracan EVO (2024)
+- Audi R8 V10 Performance (2024)
+- Nissan GT-R NISMO (2024)
+
+**Elektrikli:**
+- Tesla Model S Plaid (2024)
+- Tesla Model Y (2024)
+- Porsche Taycan Turbo S (2024)
+- BMW iX xDrive50 (2024)
+- Audi e-tron GT (2024)
+- Hyundai Ioniq 5 Limited (2024)
+- Kia EV6 GT (2024)
+
+**Lüks:**
+- Mercedes-Benz AMG GT (2024)
+- BMW M3 Competition (2024)
+- Volvo XC90 T8 AWD (2024)
+
+**Amerikan:**
+- Ford Mustang Dark Horse (2024)
+- Chevrolet Corvette E-Ray (2024)
+
+**Japon:**
+- Toyota GR Supra (2024)
+- Toyota RAV4 Hybrid (2024)
+- Honda Civic Type R (2024)
+
+### URL Yapısı
+
+**Inventory (Filtresiz):**
+```
+/inventory
+```
+
+**Inventory (Filtreli):**
+```
+/inventory?brand=porsche
+/inventory?brand=tesla&model=model-s
+```
+
+**Vehicle Detail:**
+```
+/vehicle/porsche-911-2024
+/vehicle/tesla-model-s-plaid-2024
+```
+
+### Sayfalar Arası Geçiş
+
+1. **Explore → Inventory (Filtreli):**
+   - Marka kartına tıkla
+   - `/inventory?brand={slug}`
+
+2. **Inventory → Vehicle Detail:**
+   - Araç kartına tıkla
+   - `/vehicle/{id}`
+
+3. **Vehicle Detail → Inventory:**
+   - "Back" butonu
+   - `/inventory`
+
+4. **Vehicle Detail → Compare:**
+   - "Compare" butonu
+   - `/compare?add={id}`
+
+### Loading/Empty/Error Durumları
+
+**Loading State:**
+- Skeleton loader (6 kart)
+- 1 saniye simülasyon
+
+**Empty State:**
+- "No Vehicles Found"
+- Filtre temizleme linki
+- "View All Vehicles" butonu
+
+**Error State:**
+- "Vehicle Not Found"
+- "Back to Inventory" butonu
+
+### Değişen Dosyalar
+```
+src/lib/data/
+└── vehicle-service.ts           # GÜNCELLENDİ - Vehicle interface, veriler
+
+src/app/
+├── inventory/
+│   └── page.tsx                 # GÜNCELLENDİ - Gerçek araç listesi
+└── vehicle/
+    └── [id]/
+        └── page.tsx             # YENİ - Vehicle detail sayfası
+```
+
+### Commit Bilgileri
+**Commit:** `ba82b22`
+**Mesaj:** faz-12: vehicle detail, inventory ve explore gerçek veri bağlantısı
+**Değişen Dosyalar:** 3 dosya
+**Satır Eklendi:** +1038 insertions
+**Satır Silindi:** -68 deletions
+
+### Build Durumu
+```bash
+✓ Type Check: Başarılı
+✓ Build: 18 routes (yeni: /vehicle/[id])
+✓ Git Commit: ba82b22
+✓ Git Push: origin/main
+```
+
+### Kullanıcı Deneyimi
+
+**Önce:**
+- Inventory placeholder
+- Vehicle detail sayfası yok
+- Explore sadece marka gösteriyordu
+
+**Şimdi:**
+- Inventory gerçek araç listesi
+- Vehicle detail tam özellikler
+- Explore → Inventory filtreli akış
+- Marka/model/yıl bilgileri görünür
+- Save/Compare butonları aktif
+
+**Özellikler:**
+- ✅ 17 gerçek araç verisi
+- ✅ Inventory araç listesi
+- ✅ Vehicle detail sayfası
+- ✅ Marka filtreleme aktif
+- ✅ Loading/empty/error durumları
+- ✅ Save butonu aktif
+- ✅ Compare butonu aktif
+- ✅ URL yapısı anlamlı
+- ✅ Sayfalar arası geçiş akışı
+
+### Gelecek Geliştirmeler
+
+- [ ] Daha fazla araç verisi (100+ araç)
+- [ ] Model yılı filtreleri
+- [ ] Fiyat aralığı filtreleri
+- [ ] Advanced search
+- [ ] Vehicle images
+- [ ] Compare sayfası entegrasyonu
+- [ ] Saved sayfası entegrasyonu
+- [ ] Supabase araç verisi
+
+---
+
+*Sonraki faz notları buraya eklenecektir.*
