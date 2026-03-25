@@ -1,9 +1,11 @@
-@import "tailwindcss";
-
 /**
  * AUTO PULSE — Global Styles
  * Premium Dark Theme — Obsidian Black + Neon Amber
  */
+
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
 
 :root {
   /* Renk Paleti */

@@ -224,7 +224,7 @@ Tarayıcıda [http://localhost:3000](http://localhost:3000) adresini aç.
 | **Faz 3** | Render Uyumlu Backend İskeleti | ✅ Tamamlandı |
 | **Faz 4** | Next.js Temel Uygulama İskeleti / Premium Shell | ✅ Tamamlandı |
 | **Faz 5** | Supabase Dosyaları / Auth Temeli / Kaynak Envanteri | ✅ Tamamlandı |
-| **Faz 6** | Araç Veri Yapısı & Entegrasyon | ⏳ Bekliyor |
+| **Faz 6** | Veri Kaynakları / Normalization / vehiclesdata.txt Entegrasyonu | ✅ Tamamlandı |
 | **Faz 7** | Arama & Filtreleme Sistemi | ⏳ Bekliyor |
 | **Faz 8** | Araç Detay Sayfaları | ⏳ Bekliyor |
 | **Faz 9** | AI Entegrasyonu | ⏳ Bekliyor |

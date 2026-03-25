@@ -21,7 +21,7 @@
 | 3 | Render Uyumlu Backend İskeleti | 25.03.2026 | 25.03.2026 | ✅ Tamamlandı |
 | 4 | Next.js Temel Uygulama İskeleti / Premium Shell | 25.03.2026 | 25.03.2026 | ✅ Tamamlandı |
 | 5 | Supabase Dosyaları / Auth Temeli / Kaynak Envanteri | 25.03.2026 | 25.03.2026 | ✅ Tamamlandı |
-| 6 | Araç Veri Yapısı & Entegrasyon | — | — | ⏳ Bekliyor |
+| 6 | Veri Kaynakları / Normalization / vehiclesdata.txt Entegrasyonu | 25.03.2026 | 25.03.2026 | ✅ Tamamlandı |
 | 7 | Arama & Filtreleme Sistemi | — | — | ⏳ Bekliyor |
 | 8 | Araç Detay Sayfaları | — | — | ⏳ Bekliyor |
 | 9 | AI Entegrasyonu | — | — | ⏳ Bekliyor |
@@ -297,6 +297,80 @@ src/
 - Auth sayfaları guest mode durumunda uyarı gösterir
 - `docs/supabase-setup.md` detaylı tablo yapısını içerir
 - `docs/architecture.md` zorunlu kaynakları belgeledi
+
+---
+
+## Faz 6 — Veri Kaynakları / Normalization / vehiclesdata.txt Entegrasyonu
+
+**Tarih:** 25 Mart 2026
+**Amaç:** vehiclesdata.txt içindeki araç verilerini analiz etmek, normalize etmek ve Supabase'e aktarılacak veri modelini hazırlamak.
+
+### Yapılanlar
+- [x] vehiclesdata.txt analizi tamamlandı
+- [x] Veri normalizasyon kütüphanesi oluşturuldu (`src/lib/data/normalize-vehicles.ts`)
+- [x] Marka/Model parse mantığı yazıldı
+- [x] Slug oluşturma fonksiyonu eklendi
+- [x] Supabase formatına dönüştürme hazırlandı
+- [x] `docs/data-normalization.md` oluşturuldu
+- [x] `docs/source-map.md` oluşturuldu (kaynak haritası)
+- [x] Tailwind CSS 4 → 3 downgrade (CSS sorunu düzeltildi)
+
+### vehiclesdata.txt Analiz Sonuçları
+
+| Metrik | Değer |
+|--------|-------|
+| **Toplam Marka** | ~90+ |
+| **Toplam Model** | ~1600+ |
+| **Dosya Formatı** | Plain Text (A-Z) |
+| **Marka Formatı** | BÜYÜK HARF (örn: ACURA) |
+| **Model Formatı** | "- Model Adı" (örn: "- Integra") |
+
+### Normalizasyon Yapısı
+
+```typescript
+// Parse
+const brands = parseVehiclesData(content);
+
+// Format
+interface ParsedBrand {
+  name: string;      // "ACURA"
+  slug: string;      // "acura"
+  models: ParsedModel[];
+}
+
+interface ParsedModel {
+  name: string;      // "Integra"
+  slug: string;      // "integra"
+  brandName: string; // "ACURA"
+}
+```
+
+### Supabase Tablo Planı
+
+| Tablo | Kaynak | Alanlar |
+|-------|--------|---------|
+| `vehicle_brands` | vehiclesdata.txt | name, slug, source |
+| `vehicle_models` | vehiclesdata.txt | brand_slug, name, slug, source |
+| `brand_logos` | car-logos-dataset-master/ | url, thumb_url, optimized_url |
+
+### Import Stratejisi
+
+1. **SQL Seed** → Tablo oluşturma
+2. **JSON Export** → vehiclesdata.txt → JSON
+3. **Supabase Import** → API veya SQL dump
+
+### Kaynak Haritası (Zorunlu)
+
+| Kaynak | Hedef | Durum |
+|--------|-------|-------|
+| `vehiclesdata.txt` | vehicle_brands, vehicle_models | ✅ Planlandı |
+| `car-logos-dataset-master/` | brand_logos | ✅ Planlandı |
+| `stitch/` | UI Referansı | ✅ Dokümante edildi |
+
+### Notlar
+- vehiclesdata.txt **ANA VERİ KAYNAĞIDIR** — değiştirilemez
+- Tailwind CSS 4 → 3 downgrade yapıldı (Vercel deploy sorunu için)
+- İleriki fazlarda import script'leri çalıştırılacak
 
 ---
 
