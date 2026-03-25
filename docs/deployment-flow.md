@@ -1,7 +1,7 @@
 # AUTO PULSE — Deployment Akış Belgesi
 
 > **Son Güncelleme:** 25 Mart 2026
-> **Durum:** Aktif — Faz 2: Vercel Hazırlığı
+> **Durum:** Aktif — Faz 3: Backend İskeleti
 > **GitHub Repo:** https://github.com/statelyx/autopulse
 
 ---
@@ -10,7 +10,7 @@
 
 ```
 ┌──────────────────────────────────────────────────────────────────────────────┐
-│                    AUTO PULSE — DEPLOYMENT AKIŞI (FAZ 2)                    │
+│                    AUTO PULSE — DEPLOYMENT AKIŞI (FAZ 3)                    │
 └──────────────────────────────────────────────────────────────────────────────┘
 
   ┌──────────┐     ┌──────────┐     ┌──────────┐     ┌──────────┐     ┌──────────┐
@@ -20,30 +20,40 @@
        │                │                │                │                │
    localhost:3000   Push Tetikler   Auto Build &     API Servisleri   Son Kullanıcı
    Hot Reload       CI/CD Başlar    Preview Deploy   Veritabanı       Erişimi
+                        │                                │
+                        └────────────────────────────────┘
+                              Next.js API Routes
+                        /health, /api/status, /api/env-check
 ```
 
 ---
 
-## 📦 PROJE YAPISI — VERCEL UYGUNLUK
+## 📦 PROJE YAPISI — FAZ 3 GÜNCELLEMESİ
 
-### ✅ Vercel için Uygun Yapı
+### ✅ Next.js API Routes Backend
 
 | Bileşen | Durum | Not |
 |---------|-------|-----|
 | **Framework** | ✅ Next.js 16.2.1 | Vercel native destekler |
+| **API Routes** | ✅ Aktif | `/api/health`, `/api/status`, `/api/env-check` |
 | **Build Komutu** | ✅ `npm run build` | Standart Next.js build |
-| **Çıktı Dizini** | ✅ `.next` | Next.js default |
+| **Output Mode** | ✅ `standalone` | Render için optimize |
 | **TypeScript** | ✅ Strict Mode | Build time kontrol |
-| **Node Version** | ✅ 20.x compatible | package.json'da tanımlı |
-| **Static Export** | ⚠️ Hybrid | SSR + SSG desteği |
+| **Node Version** | ✅ 20.x+ | package.json'da tanımlı |
 
-### Vercel Otomatik Algılama
+### Backend Endpoint'leri (Faz 3)
 
-Vercel bu repo'yu import ettiğinde otomatik olarak:
-- Framework'ü **Next.js** olarak tanımlar
-- Build komutunu `npm run build` olarak ayarlar
-- Output directory'yi `.next` olarak ayarlar
-- Node.js versiyonunu otomatik algılar
+```typescript
+// API Route Handlers
+src/app/api/
+├── health/
+│   └── route.ts          // GET /api/health — Render health check
+└── api/
+    ├── status/
+    │   └── route.ts      // GET /api/status — Servis durumu
+    └── env-check/
+        └── route.ts      // GET /api/env-check — Environment kontrolü
+```
 
 ---
 
@@ -54,18 +64,21 @@ Vercel bu repo'yu import ettiğinde otomatik olarak:
 # Bağımlılıkları yükle
 npm install
 
-# Ortam değişkenlerini ayarla
+# Ortam değişkenlerini ayarla (.env.local gitignore'da)
 cp .env.example .env.local
 
 # Geliştirme sunucusu
 npm run dev
 ```
 
-### Geliştirme Kuralları
-- **Port:** `localhost:3000`
-- **Hot Reload:** Dosya değişikliklerinde otomatik yenileme
-- **TypeScript:** Strict mod açık, hata varsa build olmaz
-- **Linting:** Her commit öncesi `npm run lint` çalıştırılmalı
+### Health Check Test
+```bash
+# Terminal'de test et
+curl http://localhost:3000/api/health
+
+# Veya package script'i kullan
+npm run health-check
+```
 
 ---
 
@@ -76,32 +89,9 @@ npm run dev
 - **Ana Dal:** `main`
 - **Koruma:** `main` dalı doğrudan push'a açık (tek geliştirici)
 
-### Git Akışı
-```bash
-# Değişiklikleri kontrol et
-git status
-
-# Tüm değişiklikleri ekle
-git add .
-
-# Anlamlı commit mesajı (Türkçe)
-git commit -m "faz-X: yapılan işin kısa açıklaması"
-
-# GitHub'a gönder
-git push origin main
-```
-
-### Commit Mesajı Formatı
-```
-faz-X: kısa açıklama
-
-- Detay 1
-- Detay 2
-```
-
 ---
 
-## 3️⃣ VERCEL — Frontend Deployment
+## 3️⃣ VERCEL — Frontend + API Deployment
 
 ### Vercel Projesi Oluşturma Adımları
 
@@ -126,60 +116,60 @@ faz-X: kısa açıklama
 
 ### Ortam Değişkenleri (Vercel Dashboard)
 
-Environment Variables → Production + Preview + Development için:
-
 ```bash
+# === SUPABASE ===
+SUPABASE_URL=https://wyirdbekgwxqwhfwpxkj.supabase.co
+SUPABASE_KEY=sb_publishable_1JdOGHA4rGi1EYsnrkGFHg_Ayq2iBG_
+SUPABASE_ANON_KEY_LEGACY=eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9...
+NEXT_PUBLIC_SUPABASE_URL=https://wyirdbekgwxqwhfwpxkj.supabase.co
+NEXT_PUBLIC_SUPABASE_ANON_KEY=eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9...
+SUPABASE_SERVICE_ROLE_KEY=sb_secret_... (server-side only)
+
+# === HUGGING FACE AI ===
+HF_FINEGRAINED_API_KEY=hf_...
+HF_ZEROSHOT_API_KEY=hf_...
+HF_SUMMARIZATION_API_KEY=hf_...
+HUGGINGFACE_API_KEY=hf_...
+
 # === NEXT.JS CORE ===
 NEXT_PUBLIC_APP_URL=https://autopulse.vercel.app
-
-# === SUPABASE (Faz 9+) ===
-NEXT_PUBLIC_SUPABASE_URL=https://xxxxx.supabase.co
-NEXT_PUBLIC_SUPABASE_ANON_KEY=eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9...
-SUPABASE_SERVICE_ROLE_KEY=eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9...
-
-# === HUGGING FACE AI (Faz 7+) ===
-HUGGINGFACE_API_KEY=hf_xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx
-HUGGINGFACE_MODEL=mistralai/Mistral-7B-Instruct-v0.3
-
-# === RENDER BACKEND (Faz 2+) ===
-RENDER_API_URL=https://autopulse-api.onrender.com
 ```
-
-### Preview Deployments
-
-| Özellik | Açıklama |
-|---------|----------|
-| **Oluşturma Zamanı** | Her push'ta otomatik |
-| **URL Formatı** | `https://autopulse-[hash].vercel.app` |
-| **Production'a Geçiş** | `main` dalına merge ile |
-| **Lifetime** | 7 gün sonra silinir (pro) |
 
 ---
 
-## 4️⃣ RENDER — Backend Servisleri (Faz 2+)
+## 4️⃣ RENDER — Next.js Backend Deployment
 
-### Planlanan Servisler
-| Servis | Teknoloji | Port |
-|--------|-----------|------|
-| **API Gateway** | NestJS / Fastify | 3001 |
-| **AI Servisi** | Python FastAPI | 8000 |
-| **Veritabanı** | PostgreSQL | 5432 |
-| **Cache** | Redis | 6379 |
+### Render Web Service Yapılandırması
 
-### Deploy Tetikleme
-- GitHub'a push → Render auto-deploy
-- Health check endpoint: `/api/health`
+| Ayar | Değer |
+|------|-------|
+| **Type** | Web Service |
+| **Runtime** | Node 20.x |
+| **Build Command** | `npm run build` |
+| **Start Command** | `npm start` |
+| **Health Check Path** | `/api/health` |
+
+### Environment Variables (Render Dashboard)
+
+Vercel ile aynı değişkenleri Render'a da ekleyin.
+
+### Render Deploy URL'leri
+
+| Ortam | URL |
+|-------|-----|
+| **Production** | `https://auto-pulse.onrender.com` |
+| **API Health** | `https://auto-pulse.onrender.com/api/health` |
+| **Local** | `http://localhost:3000` |
 
 ---
 
 ## 5️⃣ CANLI GÖRÜNÜM
 
-### URL'ler (Planlanan)
+### URL'ler (Aktif)
 | Ortam | URL |
 |-------|-----|
-| **Production** | `https://autopulse.vercel.app` |
-| **Preview** | `https://autopulse-[hash].vercel.app` |
-| **API** | `https://autopulse-api.onrender.com` |
+| **Production (Vercel)** | `https://autopulse.vercel.app` |
+| **Backend (Render)** | `https://auto-pulse.onrender.com` |
 | **Local** | `http://localhost:3000` |
 
 ---
@@ -191,41 +181,31 @@ RENDER_API_URL=https://autopulse-api.onrender.com
 # Lokal'de build test et
 npm run build
 
-# Lint hatalarını kontrol et
-npm run lint
-
 # Type hatalarını kontrol et
 npx tsc --noEmit
 ```
 
 ### Deploy Başarısız
-1. Vercel Dashboard'dan build loglarını kontrol et
+1. Dashboard'dan build loglarını kontrol et
 2. Ortam değişkenlerinin doğru ayarlandığından emin ol
-3. `package.json` → `engines` alanını kontrol et
+3. Health check path: `/api/health`
 
 ---
 
-## 📋 VERCEL DEPLOYMENT CHECKLIST
+## 📋 DEPLOYMENT CHECKLIST
 
 ### Pre-Deploy
 - [ ] `.env.local` dosyası `.gitignore`'da
 - [ ] `.env.example` güncel
 - [ ] `npm run build` lokal'de başarıyla çalışıyor
 - [ ] TypeScript hataları yok
-- [ ] Lint hataları yok
-
-### Vercel Dashboard
-- [ ] Proje import edildi
-- [ ] Framework: Next.js
-- [ ] Build komutu: `npm run build`
-- [ ] Environment variables eklendi
-- [ ] Custom domain (opsiyonel)
+- [ ] Health check endpoint çalışıyor
 
 ### Post-Deploy
 - [ ] Production URL erişilebilir
-- [ ] Preview deploy çalışıyor
-- [ ] Environment variables doğru yüklenmiş
-- [ ] Statik varlıklar (logo, resim) yükleniyor
+- [ ] `/api/health` 200 OK dönüyor
+- [ ] `/api/status` JSON dönüyor
+- [ ] `/api/env-check` env var'ları raporluyor
 
 ---
 

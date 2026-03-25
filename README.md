@@ -52,6 +52,11 @@ Apple, Porsche ve Lucid estetiğini, Fintech dashboard fonksiyonelliği ile birl
 auto-pulse/
 ├── src/
 │   ├── app/                    # Next.js App Router (Sayfalar & Route'lar)
+│   │   ├── api/                # API Endpoint'leri (Faz 3)
+│   │   │   ├── health/         # Health check endpoint
+│   │   │   └── api/            # Status ve env-check endpoint'leri
+│   │   ├── page.tsx            # Ana sayfa
+│   │   └── layout.tsx          # Root layout
 │   ├── components/             # UI Bileşenleri
 │   │   ├── shared/             # Ortak bileşenler (Button, Input, Modal)
 │   │   ├── vehicle/            # Araç bileşenleri (Card, Specs, AI Summary)
@@ -133,6 +138,32 @@ Vercel Dashboard → Settings → Environment Variables alanına aşağıdaki de
 
 ---
 
+## 🔌 API Endpoint'leri
+
+| Endpoint | Method | Açıklama |
+|----------|--------|----------|
+| `/api/health` | GET | Health check — Render için |
+| `/api/status` | GET | Servis durumu ve entegrasyon bilgileri |
+| `/api/env-check` | GET | Environment değişkeni kontrolü (maskeli) |
+
+### Örnek Çıktı
+
+```bash
+# Health Check
+curl https://autopulse.vercel.app/api/health
+# {"status":"ok","service":"auto-pulse","timestamp":"2026-03-25T..."}
+
+# API Status
+curl https://autopulse.vercel.app/api/status
+# {"service":"auto-pulse-api","integrations":{...}}
+
+# Env Check
+curl https://autopulse.vercel.app/api/env-check
+# {"summary":{"total":18,"present":15,"missing":3},...}
+```
+
+---
+
 ## 🏁 Hızlı Başlangıç
 
 ```bash
@@ -172,17 +203,18 @@ Tarayıcıda [http://localhost:3000](http://localhost:3000) adresini aç.
 |-----|----------|-------|
 | **Faz 1** | Repo İskeleti & İlk Push | ✅ Tamamlandı |
 | **Faz 2** | Vercel Hazırlığı & Deployment Planı | ✅ Tamamlandı |
-| **Faz 3** | Temel UI Bileşenleri & Tasarım Sistemi | ⏳ Bekliyor |
-| **Faz 4** | Dashboard & Ana Sayfa | ⏳ Bekliyor |
-| **Faz 5** | Araç Detay Sayfaları | ⏳ Bekliyor |
-| **Faz 6** | Arama & Filtreleme | ⏳ Bekliyor |
-| **Faz 7** | AI Entegrasyonu | ⏳ Bekliyor |
-| **Faz 8** | Kullanıcı Yorumları | ⏳ Bekliyor |
-| **Faz 9** | Supabase Entegrasyonu | ⏳ Bekliyor |
-| **Faz 10** | Performans Optimizasyonu | ⏳ Bekliyor |
-| **Faz 11** | SEO & Meta Veriler | ⏳ Bekliyor |
-| **Faz 12** | Test & QA | ⏳ Bekliyor |
-| **Faz 13** | Production Deploy | ⏳ Bekliyor |
+| **Faz 3** | Render Uyumlu Backend İskeleti | ✅ Tamamlandı |
+| **Faz 4** | Temel UI Bileşenleri & Tasarım Sistemi | ⏳ Bekliyor |
+| **Faz 5** | Dashboard & Ana Sayfa | ⏳ Bekliyor |
+| **Faz 6** | Araç Detay Sayfaları | ⏳ Bekliyor |
+| **Faz 7** | Arama & Filtreleme | ⏳ Bekliyor |
+| **Faz 8** | AI Entegrasyonu | ⏳ Bekliyor |
+| **Faz 9** | Kullanıcı Yorumları | ⏳ Bekliyor |
+| **Faz 10** | Supabase Entegrasyonu | ⏳ Bekliyor |
+| **Faz 11** | Performans Optimizasyonu | ⏳ Bekliyor |
+| **Faz 12** | SEO & Meta Veriler | ⏳ Bekliyor |
+| **Faz 13** | Test & QA | ⏳ Bekliyor |
+| **Faz 14** | Production Deploy | ⏳ Bekliyor |
 
 ---
 

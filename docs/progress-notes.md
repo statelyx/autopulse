@@ -18,17 +18,18 @@
 |-----|--------|-----------|-------|-------|
 | 1 | Repo İskeleti & İlk Push | 25.03.2026 | 25.03.2026 | ✅ Tamamlandı |
 | 2 | Vercel Hazırlığı & Deployment Planı | 25.03.2026 | 25.03.2026 | ✅ Tamamlandı |
-| 3 | Temel UI Bileşenleri & Tasarım Sistemi | — | — | ⏳ Bekliyor |
-| 4 | Dashboard & Ana Sayfa | — | — | ⏳ Bekliyor |
-| 5 | Araç Detay Sayfaları | — | — | ⏳ Bekliyor |
-| 6 | Arama & Filtreleme | — | — | ⏳ Bekliyor |
-| 7 | AI Entegrasyonu | — | — | ⏳ Bekliyor |
-| 8 | Kullanıcı Yorumları | — | — | ⏳ Bekliyor |
-| 9 | Supabase Entegrasyonu | — | — | ⏳ Bekliyor |
-| 10 | Performans Optimizasyonu | — | — | ⏳ Bekliyor |
-| 11 | SEO & Meta Veriler | — | — | ⏳ Bekliyor |
-| 12 | Test & QA | — | — | ⏳ Bekliyor |
-| 13 | Production Deploy | — | — | ⏳ Bekliyor |
+| 3 | Render Uyumlu Backend İskeleti | 25.03.2026 | 25.03.2026 | ✅ Tamamlandı |
+| 4 | Temel UI Bileşenleri & Tasarım Sistemi | — | — | ⏳ Bekliyor |
+| 5 | Dashboard & Ana Sayfa | — | — | ⏳ Bekliyor |
+| 6 | Araç Detay Sayfaları | — | — | ⏳ Bekliyor |
+| 7 | Arama & Filtreleme | — | — | ⏳ Bekliyor |
+| 8 | AI Entegrasyonu | — | — | ⏳ Bekliyor |
+| 9 | Kullanıcı Yorumları | — | — | ⏳ Bekliyor |
+| 10 | Supabase Entegrasyonu | — | — | ⏳ Bekliyor |
+| 11 | Performans Optimizasyonu | — | — | ⏳ Bekliyor |
+| 12 | SEO & Meta Veriler | — | — | ⏳ Bekliyor |
+| 13 | Test & QA | — | — | ⏳ Bekliyor |
+| 14 | Production Deploy | — | — | ⏳ Bekliyor |
 
 ---
 
@@ -49,67 +50,91 @@
 - [x] Placeholder dosyalar eklendi (boş görünmesin)
 - [x] GitHub'a ilk push yapıldı
 
-### Notlar
-- `stitch/` klasörü tasarım referansları olarak korunuyor
-- `car-logos-dataset-master/` ileride Supabase'e aktarılacak
-- `vehiclesdata.txt` slide bar için normalize edilecek
-- Henüz uygulama kodu yazılmadı, iskelet aşamasında
-
 ---
 
 ## Faz 2 — Vercel Hazırlığı & Deployment Planı
 
 **Tarih:** 25 Mart 2026
-**Amaç:** GitHub repo yapısını Vercel deploy'a uygun hale getirmek ve deployment düşüncesini netleştirmek.
+**Amaç:** GitHub repo yapısını Vercel deploy'a uygun hale getirmek.
 
 ### Yapılanlar
-- [x] Proje yapısı Vercel deploy uygunluğu açısından değerlendirildi
-- [x] Next.js 16.2.1 + App Router yapısı doğrulandı
 - [x] .env.example — Vercel env değişkenleri eklendi
 - [x] README.md — Vercel deployment bölümü eklendi
 - [x] docs/deployment-flow.md — Vercel odaklı güncellendi
-- [x] Environment variable grupları belirlendi:
-  - Supabase (URL, Anon Key, Service Role)
-  - Hugging Face (API Key, Model)
-  - Render (API URL, Internal URL)
-  - App URL'ler (Local, Production, Preview)
+- [x] Environment variable grupları belirlendi
 
-### Vercel Bağlantı Planı
+---
 
-| Adım | Açıklama |
-|------|----------|
-| 1 | vercel.com → "Add New Project" |
-| 2 | GitHub → statelyx/autopulse seç |
-| 3 | Framework: Next.js (otomatik) |
-| 4 | Environment Variables ekle |
-| 5 | Deploy |
+## Faz 3 — Render Uyumlu Backend İskeleti
 
-### Environment Variable Groups
+**Tarih:** 25 Mart 2026
+**Amaç:** Render deploy'u için minimum ama çalışan backend iskeleti oluşturmak.
+
+### Yapılanlar
+- [x] Next.js API Routes ile backend endpoint'leri oluşturuldu
+- [x] `src/app/api/health/route.ts` — Health check endpoint
+- [x] `src/app/api/api/status/route.ts` — API status endpoint
+- [x] `src/app/api/api/env-check/route.ts` — Environment check endpoint
+- [x] `next.config.ts` — `output: 'standalone'` eklendi (Render için)
+- [x] `package.json` — `engines` alanı eklendi, `health-check` script'i eklendi
+- [x] `.env.local` — Local environment dosyası oluşturuldu (.gitignore'da)
+- [x] README.md — API Endpoint'leri bölümü eklendi
+- [x] docs/deployment-flow.md — Backend deployment notları eklendi
+
+### API Endpoint'leri
+
+| Endpoint | Method | Açıklama |
+|----------|--------|----------|
+| `/api/health` | GET | Render health check — 200 OK |
+| `/api/status` | GET | Servis durumu + entegrasyon bilgileri |
+| `/api/env-check` | GET | Environment kontrolü (maskeli değerler) |
+
+### Backend Yapısı
+
+```
+src/app/api/
+├── health/
+│   └── route.ts          # GET /api/health
+└── api/
+    ├── status/
+    │   └── route.ts      # GET /api/status
+    └── env-check/
+        └── route.ts      # GET /api/env-check
+```
+
+### Environment Değişkenleri (Projede Kullanılan)
 
 ```bash
-# === SUPABASE ===
-NEXT_PUBLIC_SUPABASE_URL=        # Client-side erişim
-NEXT_PUBLIC_SUPABASE_ANON_KEY=   # Public operations
-SUPABASE_SERVICE_ROLE_KEY=       # Server-side only
+# Supabase
+SUPABASE_URL
+SUPABASE_KEY
+SUPABASE_ANON_KEY_LEGACY
+SUPABASE_SECRETKEY
+NEXT_PUBLIC_SUPABASE_URL
+NEXT_PUBLIC_SUPABASE_ANON_KEY
+SUPABASE_SERVICE_ROLE_KEY
 
-# === HUGGING FACE AI ===
-HUGGINGFACE_API_KEY=             # Ücretsiz tier token
-HUGGINGFACE_MODEL=               # Model identifier
+# Hugging Face
+HF_FINEGRAINED_API_KEY
+HF_ZEROSHOT_API_KEY
+HF_SUMMARIZATION_API_KEY
+HUGGINGFACE_API_KEY
 
-# === RENDER BACKEND ===
-RENDER_API_URL=                  # Public API URL
-RENDER_INTERNAL_API_URL=         # Internal service URL
+# Next.js Core
+NEXT_PUBLIC_APP_URL
+NEXT_PUBLIC_APP_NAME
+NODE_ENV
 
-# === APP URLS ===
-NEXT_PUBLIC_APP_URL=             # Production URL
-NEXT_PUBLIC_VERCEL_URL=          # Vercel otomatik
+# Render
+RENDER_API_URL
+RENDER_INTERNAL_API_URL
 ```
 
 ### Notlar
-- Bu aşamada uygulama kodları yazılmadı
-- Amaç deploy stratejisi ve env yapılandırmasını netleştirmekti
-- Next.js projesi Vercel için hazır durumda
-- Bir sonraki faz UI bileşenlerinin oluşturulması
+- Backend ayrı bir servis değil, Next.js API Routes olarak implement edildi
+- Render health check path: `/api/health`
+- Vercel ve Render aynı kod tabanını deploy eder
+- `.env.local` local development içindir, git'e push edilmez
 
 ---
 
