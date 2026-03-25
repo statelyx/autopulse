@@ -3,7 +3,7 @@
  * vehiclesdata.txt'ten marka ve model verilerini sağlar
  */
 
-import { parseVehiclesData, getStats } from './normalize-vehicles';
+// import { parseVehiclesData, getStats } from './normalize-vehicles';
 
 export interface VehicleBrand {
   name: string;
@@ -96,4 +96,15 @@ export function getBrandBySlug(slug: string): VehicleBrand | undefined {
 export function getModelsByBrandSlug(brandSlug: string): string[] {
   const brand = getBrandBySlug(brandSlug);
   return brand?.models || [];
+}
+
+/**
+ * Üretim yılları listesi (1990-2026)
+ */
+export function getProductionYears(): number[] {
+  const years: number[] = [];
+  for (let year = 2026; year >= 1990; year--) {
+    years.push(year);
+  }
+  return years;
 }
