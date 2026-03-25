@@ -9,11 +9,26 @@
 import { useState } from 'react';
 import { useLanguageTheme } from '@/contexts/LanguageThemeContext';
 import { useTranslation } from '@/lib/i18n/translations';
+import { useRouter } from 'next/navigation';
 
 export function HeroSection() {
   const [isSearchFocused, setIsSearchFocused] = useState(false);
+  const [searchQuery, setSearchQuery] = useState('');
   const { language } = useLanguageTheme();
   const { t } = useTranslation(language);
+  const router = useRouter();
+
+  const handleAnalyze = () => {
+    if (searchQuery.trim()) {
+      router.push(`/search?q=${encodeURIComponent(searchQuery.trim())}`);
+    }
+  };
+
+  const handleKeyPress = (e: React.KeyboardEvent) => {
+    if (e.key === 'Enter') {
+      handleAnalyze();
+    }
+  };
 
   return (
     <section className="relative h-[870px] w-full overflow-hidden flex flex-col items-center justify-center">
@@ -60,8 +75,15 @@ export function HeroSection() {
               className="w-full bg-transparent border-none text-on-surface font-body px-6 py-6 focus:ring-0 placeholder:text-on-surface-variant/40 placeholder:uppercase placeholder:tracking-widest placeholder:text-xs"
               placeholder={t('heroSearchPlaceholder')}
               type="text"
+              value={searchQuery}
+              onChange={(e) => setSearchQuery(e.target.value)}
+              onKeyPress={handleKeyPress}
             />
-            <button className="mr-4 px-6 py-3 bg-primary-container text-on-primary-fixed font-headline font-bold uppercase text-xs rounded-lg hover:brightness-110 transition-all active:scale-95">
+            <button
+              onClick={handleAnalyze}
+              className="mr-4 px-6 py-3 bg-primary-container text-on-primary-fixed font-headline font-bold uppercase text-xs rounded-lg hover:brightness-110 transition-all active:scale-95 disabled:opacity-50 disabled:cursor-not-allowed"
+              disabled={!searchQuery.trim()}
+            >
               {language === 'tr' ? 'Analiz Et' : 'Synthesize'}
             </button>
           </div>

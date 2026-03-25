@@ -10,6 +10,7 @@ import { useState, useEffect, useMemo } from 'react';
 import { useLanguageTheme } from '@/contexts/LanguageThemeContext';
 import { useTranslation } from '@/lib/i18n/translations';
 import { getVehicleBrands, getModelsByBrandSlug, getProductionYears } from '@/lib/data/vehicle-service';
+import { useRouter } from 'next/navigation';
 
 export interface FilterState {
   brand: string;
@@ -20,6 +21,7 @@ export interface FilterState {
 export function FilterSection() {
   const { language } = useLanguageTheme();
   const { t } = useTranslation(language);
+  const router = useRouter();
 
   // Filter state
   const [brands, setBrands] = useState<Array<{name: string; slug: string}>>([]);
@@ -64,6 +66,19 @@ export function FilterSection() {
       setSelectedYear('');
     }
   }, [selectedModel]);
+
+  const handleSearch = () => {
+    if (selectedBrand && selectedModel && selectedYear) {
+      // AI analiz sonuç sayfasına yönlendir
+      router.push(`/search?brand=${selectedBrand}&model=${encodeURIComponent(selectedModel)}&year=${selectedYear}`);
+    }
+  };
+
+  const handleKeyPress = (e: React.KeyboardEvent) => {
+    if (e.key === 'Enter' && selectedBrand && selectedModel && selectedYear) {
+      handleSearch();
+    }
+  };
 
   return (
     <section className="max-w-7xl mx-auto px-8 -mt-16 relative z-30 pb-24">
@@ -149,6 +164,8 @@ export function FilterSection() {
             Action
           </label>
           <button
+            onClick={handleSearch}
+            onKeyPress={handleKeyPress}
             className="w-full bg-primary-container text-on-primary-container font-headline font-bold uppercase text-xs rounded-lg py-3 px-4 hover:bg-primary-container/90 active:scale-95 disabled:opacity-50 disabled:cursor-not-allowed transition-all"
             disabled={!selectedYear}
           >
