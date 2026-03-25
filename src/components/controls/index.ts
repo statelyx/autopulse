@@ -2,4 +2,4 @@
  * AUTO PULSE — Controls Components Index
  */
 
-export { LanguageThemeSwitcher } from './LanguageThemeSwitcher';
+export { LanguageSwitcher, ThemeSwitcher } from './LanguageThemeSwitcher';

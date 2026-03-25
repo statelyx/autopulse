@@ -3,6 +3,7 @@
 /**
  * AUTO PULSE — Language & Theme Context
  * Dil ve tema yönetimi için global context
+ * Varsayılan: Türkçe (tr) + Dark mode
  */
 
 import { createContext, useContext, useEffect, useState, ReactNode } from 'react';
@@ -22,20 +23,29 @@ interface LanguageThemeContextType {
 const LanguageThemeContext = createContext<LanguageThemeContextType | undefined>(undefined);
 
 export function LanguageThemeProvider({ children }: { children: ReactNode }) {
-  const [language, setLanguageState] = useState<Language>('tr');
-  const [theme, setThemeState] = useState<Theme>('dark');
+  const [language, setLanguageState] = useState<Language>('tr'); // Varsayılan Türkçe
+  const [theme, setThemeState] = useState<Theme>('dark'); // Varsayılan dark
 
   // LocalStorage'dan yükle
   useEffect(() => {
     const savedLanguage = localStorage.getItem('autopulse-language') as Language;
     const savedTheme = localStorage.getItem('autopulse-theme') as Theme;
 
+    // Sadece geçerli değerleri kullan
     if (savedLanguage && (savedLanguage === 'tr' || savedLanguage === 'en')) {
       setLanguageState(savedLanguage);
     }
 
     if (savedTheme && (savedTheme === 'light' || savedTheme === 'dark')) {
       setThemeState(savedTheme);
+    }
+
+    // LocalStorage boşsa veya yoksa varsayılanları kaydet
+    if (!savedLanguage) {
+      localStorage.setItem('autopulse-language', 'tr');
+    }
+    if (!savedTheme) {
+      localStorage.setItem('autopulse-theme', 'dark');
     }
   }, []);
 

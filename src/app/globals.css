@@ -8,7 +8,7 @@
 @tailwind utilities;
 
 :root {
-  /* Renk Paleti */
+  /* Renk Paleti - Dark Mode (Default) */
   --color-obsidian: #0e0e0e;
   --color-background: #131313;
   --color-surface: #131313;
@@ -18,13 +18,10 @@
   --color-surface-container-high: #2a2a2a;
   --color-surface-container-highest: #353534;
   --color-primary-container: #ffb000;
-  --color-secondary-container: "#00eefc";
   --color-on-surface: #e5e2e1;
   --color-on-surface-variant: #d7c4ac;
   --color-on-background: #e5e2e1;
   --color-outline-variant: #524533;
-  --color-primary: #ffd597;
-  --color-secondary-fixed-dim: "#00dbe9";
 }
 
 * {
@@ -46,6 +43,7 @@ body {
   line-height: 1.6;
   -webkit-font-smoothing: antialiased;
   -moz-osx-font-smoothing: grayscale;
+  transition: background-color 0.3s ease, color 0.3s ease;
 }
 
 /* Material Symbols Outlined */
@@ -58,7 +56,7 @@ body {
   background: radial-gradient(circle at 50% 50%, rgba(255, 176, 0, 0.15) 0%, transparent 70%);
 }
 
-/* Glass Panel */
+/* Glass Panel - Dark */
 .glass-panel {
   background: rgba(53, 53, 52, 0.4);
   backdrop-filter: blur(20px);
@@ -77,7 +75,7 @@ body {
   outline-offset: 2px;
 }
 
-/* Scrollbar */
+/* Scrollbar - Dark */
 ::-webkit-scrollbar {
   width: 8px;
   height: 8px;
@@ -96,38 +94,74 @@ body {
   background: #4a4949;
 }
 
-/* Light Mode */
+/* ============================================
+   LIGHT MODE - Gerçek Açık Renkler
+   ============================================ */
+
 html:not(.dark) {
   --color-background: #ffffff;
-  --color-surface: #f5f5f5;
-  --color-surface-container: #e8e8e8;
-  --color-surface-container-low: #ededed;
+  --color-surface: #fafafa;
+  --color-surface-container: #f3f4f6;
+  --color-surface-container-low: #f9fafb;
   --color-surface-container-lowest: #ffffff;
-  --color-surface-container-high: #d4d4d4;
-  --color-surface-container-highest: #c4c4c4;
-  --color-on-surface: #1c1b1f;
-  --color-on-surface-variant: #49454f;
-  --color-on-background: #1c1b1f;
-  --color-outline-variant: #cac4d0;
+  --color-surface-container-high: #e5e7eb;
+  --color-surface-container-highest: #d1d5db;
+  --color-on-surface: #111827;
+  --color-on-surface-variant: #6b7280;
+  --color-on-background: #111827;
+  --color-outline-variant: #e5e7eb;
 }
 
 html:not(.dark) body {
-  background-color: #ffffff;
-  color: #1c1b1f;
+  background-color: #ffffff !important;
+  color: #111827 !important;
 }
 
 html:not(.dark) ::-webkit-scrollbar-track {
-  background: #f5f5f5;
+  background: #f3f4f6;
 }
 
 html:not(.dark) ::-webkit-scrollbar-thumb {
-  background: #c4c4c4;
+  background: #d1d5db;
 }
 
 html:not(.dark) ::-webkit-scrollbar-thumb:hover {
-  background: #a0a0a0;
+  background: #9ca3af;
 }
 
 html:not(.dark) .glass-panel {
-  background: rgba(196, 196, 196, 0.4);
+  background: rgba(255, 255, 255, 0.8);
+}
+
+/* Tüm bileşenlerde light mode geçişi */
+html:not(.dark) .bg-background {
+  background-color: #ffffff !important;
+}
+
+html:not(.dark) .bg-surface {
+  background-color: #fafafa !important;
+}
+
+html:not(.dark) .bg-surface-container {
+  background-color: #f3f4f6 !important;
+}
+
+html:not(.dark) .bg-surface-container-low {
+  background-color: #f9fafb !important;
+}
+
+html:not(.dark) .bg-surface-container-highest {
+  background-color: #e5e7eb !important;
+}
+
+html:not(.dark) .text-on-surface {
+  color: #111827 !important;
+}
+
+html:not(.dark) .text-on-surface-variant {
+  color: #6b7280 !important;
+}
+
+html:not(.dark) .border-outline-variant {
+  border-color: #e5e7eb !important;
 }

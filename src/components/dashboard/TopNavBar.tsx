@@ -3,14 +3,14 @@
 /**
  * AUTO PULSE — TopNavBar Component
  * Fixed top navigation bar with backdrop blur
- * Interactive navigation with active states + Language/Theme controls
+ * Interactive navigation with active states + Minimal Language/Theme controls
  */
 
 import Link from 'next/link';
 import { usePathname } from 'next/navigation';
 import { useLanguageTheme } from '@/contexts/LanguageThemeContext';
 import { useTranslation } from '@/lib/i18n/translations';
-import { LanguageThemeSwitcher } from '@/components/controls';
+import { LanguageSwitcher, ThemeSwitcher } from '@/components/controls';
 
 export function TopNavBar() {
   const pathname = usePathname();
@@ -49,9 +49,12 @@ export function TopNavBar() {
         </div>
       </div>
 
-      <div className="flex items-center gap-4">
-        {/* Dil ve Tema Kontrolleri */}
-        <LanguageThemeSwitcher />
+      <div className="flex items-center gap-2">
+        {/* Dil Butonu - Minimal */}
+        <LanguageSwitcher />
+
+        {/* Tema Butonu - Minimal */}
+        <ThemeSwitcher />
 
         {/* Bildirimler */}
         <button className="p-2 text-on-surface/60 hover:text-primary-container transition-colors active:scale-95 duration-200">
