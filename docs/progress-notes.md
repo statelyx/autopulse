@@ -26,9 +26,9 @@
 | 8 | Dil Sistemi / TR-EN Butonu / Light-Dark Tema | 25.03.2026 | 25.03.2026 | ✅ Tamamlandı |
 | 9 | Supabase Marka Verisi / Tüm Markalar Aktif Getirme | 25.03.2026 | 25.03.2026 | ✅ Tamamlandı |
 | 10 | Marka-Model-Yıl Akışı / Supabase Bağlantısı | 25.03.2026 | 25.03.2026 | ✅ Tamamlandı |
-| 11 | Araç Detay Sayfaları | — | — | ⏳ Bekliyor |
-| 11 | AI Entegrasyonu | — | — | ⏳ Bekliyor |
-| 12 | Kullanıcı Yorumları | — | — | ⏳ Bekliyor |
+| 11 | Logo Verisi / Seçimde Doğru Logo Gösterme | 25.03.2026 | 25.03.2026 | ✅ Tamamlandı |
+| 12 | AI Entegrasyonu | — | — | ⏳ Bekliyor |
+| 13 | Kullanıcı Yorumları | — | — | ⏳ Bekliyor |
 | 13 | Performans Optimizasyonu | — | — | ⏳ Bekliyor |
 | 14 | SEO & Meta Veriler | — | — | ⏳ Bekliyor |
 | 15 | Test & QA | — | — | ⏳ Bekliyor |
@@ -1063,6 +1063,192 @@ Gelecek fazlarda Supabase entegrasyonu için:
 - State yap hazır (FilterState)
 - Akış mantık hazır
 - Component yapısı uyumlu
+
+---
+
+*Sonraki faz notları buraya eklenecektir.*
+
+## Faz 11 — Logo Verisi / Seçimde Doğru Logo Gösterme
+
+**Tarih:** 25 Mart 2026
+**Amaç:** car-logos-dataset-master kaynaklı logoları arayüzle bağlayarak doğru marka logosunu görünür hale getirmek.
+
+### Yapılanlar
+
+#### 1. Logo Veri Seti Kopyalama
+- [x] car-logos-dataset-master'dan 87 logo kopyalandı
+- [x] public/brands/ klasörüne taşındı
+- [x] PNG formatında optimize edilmiş logolar
+
+#### 2. Logo Service Oluşturma
+- [x] src/lib/data/logo-service.ts oluşturuldu
+- [x] getBrandLogo() fonksiyonu (slug → logo path)
+- [x] Alias destekli eşleşme (mercedes → mercedes-benz, vw → volkswagen)
+- [x] Fallback logo mantığı (logo yoksa directions_car icon)
+- [x] getBrandsWithLogos() fonksiyonu (brand listesi + logo path)
+- [x] hasBrandLogo() kontrol fonksiyonu
+
+#### 3. Component Entegrasyonu
+- [x] QuickAccessGrid'e logolar eklendi
+- [x] Discover page'e logolar eklendi
+- [x] Image component ile optimize edilmiş gösterim
+- [x] onError fallback - logo yoksa icon
+
+### Logo Eşleme Mantığı
+
+```
+Brand Slug (mercedes-benz)
+        ↓
+Normalize (lowercase, trim)
+        ↓
+Alias Kontrol (mercedes → mercedes-benz)
+        ↓
+Logo Dosyası Kontrol (availableLogos array)
+        ↓
+Logo Path (/brands/mercedes-benz.png)
+        ↓
+Image Component
+        ↓
+[Success] Logo Göster
+[Error] directions_car Icon Fallback
+```
+
+### Alias Desteklenen Markalar
+
+**Örnekler:**
+- `mercedes` → `mercedes-benz.png`
+- `range-rover` → `land-rover.png`
+- `vw` → `volkswagen.png`
+- `ford-mustang` → `ford-mustang.png` (özel logo)
+
+### Mevcut Logo Dosyaları (87 Marka)
+
+**Premium:** Ferrari, Lamborghini, McLaren, Porsche, Bugatti, Pagani
+**Alman:** BMW, Mercedes-Benz, Audi, Porsche, Volkswagen
+**Japon:** Toyota, Honda, Nissan, Mazda, Subaru, Suzuki, Lexus
+**Kore:** Hyundai, Kia, SsangYong
+**Amerikan:** Ford, Chevrolet, Dodge, Cadillac, Tesla
+**İngiliz:** Aston Martin, Bentley, Rolls-Royce, Jaguar, Land Rover
+**İtalyan:** Ferrari, Lamborghini, Maserati, Alfa Romeo
+**Fransız:** Peugeot, Renault, Citroen
+**Diğer:** Volvo, Saab, Seat, Skoda
+
+### Fallback Logo Mantığı
+
+**1. Logo Bulunamaz:**
+- getBrandLogo() → '/brands/fallback.png'
+- Image component onError tetiklenir
+- Logo gizlenir (display: none)
+- directions_car icon gösterilir
+
+**2. Logo Yüklenemez:**
+- Aynı onError mantığı
+- Icon fallback
+
+**3. Fallback Markalar:**
+- Lucid, Rivian, Polestar, Koenigsegg
+- Henüz logo dosyası olmayan markalar
+
+### Kullanım Örnekleri
+
+**Component Kullanımı:**
+```tsx
+import Image from 'next/image';
+import { getBrandLogo } from '@/lib/data/logo-service';
+
+<Image
+  src={getBrandLogo('porsche')}
+  alt="Porsche"
+  width={64}
+  height={64}
+  onError={(e) => {
+    // Icon fallback
+  }}
+/>
+```
+
+**Brand Listesi Kullanımı:**
+```tsx
+const brandsWithLogos = getBrandsWithLogos(brands);
+brandsWithLogos.map(brand => (
+  <Image src={brand.logoPath} alt={brand.name} />
+))
+```
+
+### Performans İpuçları
+
+- Next.js Image component otomatik optimizasyon
+- Logo path cache'li (tekrarlayan çağrılar hızlı)
+- Lazy loading desteği
+- Preload mümkün (kritik logolar için)
+
+### Değişen Dosyalar
+```
+public/brands/                       # YENİ - 87 logo dosyası
+├── porsche.png
+├── bmw.png
+├── mercedes-benz.png
+└── ... (84 daha)
+
+src/lib/data/
+└── logo-service.ts                  # YENİ - Logo eşleme servisi
+
+src/components/dashboard/
+└── QuickAccessGrid.tsx              # GÜNCELLENDİ - Logo entegrasyonu
+
+src/app/
+└── discover/page.tsx                # GÜNCELLENDİ - Logo entegrasyonu
+
+docs/
+└── logo-usage.md                    # YENİ - Logo kullanım kılavuzu
+```
+
+### Commit Bilgileri
+**Commit:** `ad6950c`
+**Mesaj:** faz-11: logo verisi entegrasyonu ve marka logo gösterimi
+**Değişen Dosyalar:** 90 dosya
+**Satır Eklendi:** +334 insertions
+**Satır Silindi:** -6 deletions
+
+### Build Durumu
+```bash
+✓ Type Check: Başarılı
+✓ Build: 17 routes
+✓ Git Commit: ad6950c
+✓ Git Push: origin/main
+```
+
+### Kullanıcı Deneyimi
+
+**Önce:**
+- Sadece directions_car icon
+- Tüm markalar aynı icon
+
+**Şimdi:**
+- Her markanın kendi logosu
+- 87 marka için gerçek logo
+- Logo yoksa icon fallback
+- Hover animasyonları
+
+**Özellikler:**
+- ✅ 87 marka logosu aktif
+- ✅ QuickAccessGrid'de logolar
+- ✅ Discover page'de logolar
+- ✅ Alias desteği (mercedes → mercedes-benz)
+- ✅ Fallback mantığı (logo yoksa icon)
+- ✅ Image optimization
+- ✅ Type check passed
+- ✅ Build successful
+
+### Gelecek Geliştirmeler
+
+- [ ] FilterSection'da marka seçimi logo gösterimi
+- [ ] Search sonuçlarında logolar
+- [ ] Vehicle detail sayfalarında logo
+- [ ] Compare sayfasında logo karşılaştırması
+- [ ] Saved vehicles listesinde logolar
+- [ ] Supabase logo metadata entegrasyonu
+- [ ] Logo variant'ları (dark/light mode)
 
 ---
 
