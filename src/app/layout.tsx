@@ -1,5 +1,5 @@
 import type { Metadata } from "next";
-import { Inter } from "next/font/google";
+import { Inter, Space_Grotesk } from "next/font/google";
 import "./globals.css";
 
 const inter = Inter({
@@ -7,9 +7,15 @@ const inter = Inter({
   variable: "--font-inter",
 });
 
+const spaceGrotesk = Space_Grotesk({
+  subsets: ["latin"],
+  variable: "--font-space-grotesk",
+  weight: ["300", "400", "500", "600", "700"],
+});
+
 export const metadata: Metadata = {
-  title: "Auto Pulse — Premium Otomotiv Intelligence",
-  description: "Teknik araç verileri, gerçek kullanıcı yorumları ve yapay zeka analizleri.",
+  title: "Auto Pulse Intelligence | The Digital Cockpit",
+  description: "Harness high-fidelity automotive intelligence. Real-time trend analysis, predictive failure modeling, and cross-market price synthesis.",
 };
 
 export default function RootLayout({
@@ -18,8 +24,14 @@ export default function RootLayout({
   children: React.ReactNode;
 }>) {
   return (
-    <html lang="tr" className={`${inter.variable} antialiased`}>
-      <body className="min-h-screen bg-[#0A0A0A] text-white">
+    <html lang="en" className="dark">
+      <head>
+        <link
+          href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&display=swap"
+          rel="stylesheet"
+        />
+      </head>
+      <body className={`${inter.variable} ${spaceGrotesk.variable} antialiased selection:bg-primary-container selection:text-on-primary-container`}>
         {children}
       </body>
     </html>

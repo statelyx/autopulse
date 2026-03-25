@@ -374,4 +374,97 @@ interface ParsedModel {
 
 ---
 
+## INTERİM FAZ — Vercel 404 Fix + Stitch Design Implementation
+
+**Tarih:** 25 Mart 2026
+**Amaç:** Vercel 404 sorununu çözmek ve stitch/ tasarımını birebir Next.js bileşenlerine dönüştürmek.
+
+### Yapılanlar
+- [x] `next.config.ts` — `output: 'standalone'` kaldırıldı (Vercel uyumluluğu için)
+- [x] `vercel.json` oluşturuldu (Vercel deployment konfigürasyonu)
+- [x] `tailwind.config.ts` — Obsidian Kinetic Design System renk paleti eklendi
+- [x] `src/app/globals.css` — Özel stiller (high-beam-effect, glass-panel) eklendi
+- [x] `src/app/layout.tsx` — Space Grotesk fontu ve Material Symbols eklendi
+- [x] Dashboard komponenleri oluşturuldu:
+  - `TopNavBar.tsx` — Üst navigasyon bar
+  - `SideNavBar.tsx` — Sol sidebar (mobile'da gizli)
+  - `HeroSection.tsx` — Hero bölümü, araba görseli ve AI arama çubuğu
+  - `FilterSection.tsx` — Marka/Model/Yıl filtreleri
+  - `QuickAccessGrid.tsx` — Market Clusters grid
+  - `BentoGridInsights.tsx` — Featured Insight ve Trending AI Scores
+  - `ChronicIssueReports.tsx` — Kronik sorun raporları
+  - `Footer.tsx` — Footer ve Core Load indikatörü
+- [x] `src/app/page.tsx` — Ana sayfa tüm bileşenlerle güncellendi
+
+### Tasarım Detayları
+
+Stitch tasarımından birebir kopyalanan elementler:
+
+| Element | Kaynak | Detay |
+|---------|--------|-------|
+| **Renk Paleti** | `tailwind.config` içinde | Obsidian Kinetic Design System (primary, surface, on-surface, vb.) |
+| **Fontlar** | Google Fonts | Space Grotesk (headline), Inter (body/label) |
+| **İkonlar** | Material Symbols Outlined | FILL 0, wght 400, GRAD 0, opsz 24 |
+| **Efektler** | CSS özel sınıflar | `high-beam-effect`, `glass-panel` |
+| **Hero Görsel** | Google Hosted Image | Dramatik süper araba görseli |
+| **Navbar** | Fixed + backdrop blur | Üst bar ve sol sidebar |
+
+### Vercel Deployment Düzeltmeleri
+
+| Sorun | Çözüm |
+|-------|-------|
+| `output: 'standalone'` | Kaldırıldı (Render için gerekli, Vercel'de sorun) |
+| Build output | `.next` dizini doğru generate ediliyor |
+| Route yapılandırması | `vercel.json` eklendi |
+
+### Dosya Yapısı
+
+```
+src/components/dashboard/
+├── index.ts              # Export index
+├── TopNavBar.tsx         # Üst navigasyon
+├── SideNavBar.tsx        # Sol sidebar
+├── HeroSection.tsx       # Hero + Arama
+├── FilterSection.tsx     # Filtre paneli
+├── QuickAccessGrid.tsx   # Market Clusters
+├── BentoGridInsights.tsx # Bento grid
+├── ChronicIssueReports.tsx # Sorun raporları
+└── Footer.tsx            # Footer
+```
+
+### Build Durumu
+
+```bash
+✓ Compiled successfully
+✓ Running TypeScript
+✓ Collecting page data
+✓ Generating static pages
+
+Route (app)
+┌ ○ /                    # Ana sayfa
+├ ○ /_not-found
+├ ○ /about
+├ ƒ /api/api/env-check
+├ ƒ /api/api/status
+├ ƒ /api/health
+├ ○ /auth/login
+├ ○ /auth/register
+├ ○ /compare
+├ ○ /dashboard
+├ ○ /discover
+├ ○ /issues
+├ ○ /saved
+├ ○ /search
+└ ○ /vin
+```
+
+### Notlar
+- Tasarım **stitch/stitch/auto_pulse_dashboard/code.html** dosyasından birebir alındı
+- "No-Line" rule ve "Glass & Gradient" rules korundu
+- Tüm renkler, fontlar ve efektler orijinal tasarım ile aynı
+- Vercel deploy için `vercel.json` eklendi
+- `output: 'standalone'` sadece Render için gerekli, Vercel'de kaldırıldı
+
+---
+
 *Sonraki faz notları buraya eklenecektir.*
