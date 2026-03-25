@@ -2,42 +2,51 @@
 
 /**
  * AUTO PULSE — Explore Page
- * Interactive brand and model exploration
+ * Interactive brand and model exploration with real vehicle data from vehiclesdata.txt
  */
 
 import { TopNavBar, SideNavBar } from '@/components/dashboard';
+import { useLanguageTheme } from '@/contexts/LanguageThemeContext';
+import { useTranslation } from '@/lib/i18n/translations';
 import Link from 'next/link';
-import { useState } from 'react';
+import { useState, useMemo } from 'react';
+import { getVehicleBrands } from '@/lib/data/vehicle-service';
 
 export default function ExplorePage() {
+  const { language } = useLanguageTheme();
+  const { t } = useTranslation(language);
   const [selectedCategory, setSelectedCategory] = useState<string>('all');
 
+  // Gerçek marka verisini yükle
+  const allBrands = useMemo(() => getVehicleBrands(), []);
+
   const categories = [
-    { id: 'all', name: 'All Brands', icon: 'grid_view' },
-    { id: 'performance', name: 'Performance', icon: 'sports_score' },
-    { id: 'electric', name: 'Electric', icon: 'electric_car' },
-    { id: 'luxury', name: 'Luxury', icon: 'diamond' },
+    { id: 'all', name: language === 'tr' ? 'Tüm Markalar' : 'All Brands', icon: 'grid_view' },
+    { id: 'performance', name: language === 'tr' ? 'Performans' : 'Performance', icon: 'sports_score' },
+    { id: 'electric', name: language === 'tr' ? 'Elektrikli' : 'Electric', icon: 'electric_car' },
+    { id: 'luxury', name: language === 'tr' ? 'Lüks' : 'Luxury', icon: 'diamond' },
     { id: 'suv', name: 'SUV', icon: 'directions_car' },
   ];
 
-  const brands = [
-    { name: 'Porsche', models: 12, category: 'performance' },
-    { name: 'Tesla', models: 8, category: 'electric' },
-    { name: 'BMW', models: 24, category: 'luxury' },
-    { name: 'Mercedes', models: 20, category: 'luxury' },
-    { name: 'Ferrari', models: 6, category: 'performance' },
-    { name: 'Audi', models: 18, category: 'performance' },
-    { name: 'Lexus', models: 10, category: 'luxury' },
-    { name: 'Rivian', models: 3, category: 'electric' },
-    { name: 'Range Rover', models: 9, category: 'suv' },
-    { name: 'Lamborghini', models: 5, category: 'performance' },
-    { name: 'Polestar', models: 4, category: 'electric' },
-    { name: 'Jaguar', models: 7, category: 'luxury' },
-  ];
-
+  // Kategori bazlı filtreleme (basit mantık - marka ismine göre)
   const filteredBrands = selectedCategory === 'all'
-    ? brands
-    : brands.filter(brand => brand.category === selectedCategory);
+    ? allBrands
+    : allBrands.filter(brand => {
+        const name = brand.name.toLowerCase();
+        // Basit kategorizasyon (gerçek uygulamada daha gelişmiş olabilir)
+        switch (selectedCategory) {
+          case 'performance':
+            return ['porsche', 'ferrari', 'lamborghini', 'mclaren', 'audi', 'bmw'].some(p => name.includes(p));
+          case 'electric':
+            return ['tesla', 'rivian', 'polestar', 'lucid', 'nio', 'xpeng'].some(p => name.includes(p));
+          case 'luxury':
+            return ['bmw', 'mercedes', 'audi', 'lexus', 'range rover', 'jaguar'].some(p => name.includes(p));
+          case 'suv':
+            return ['range rover', 'porsche', 'bmw', 'mercedes', 'audi', 'lexus'].some(p => name.includes(p));
+          default:
+            return true;
+        }
+      });
 
   return (
     <>
@@ -48,10 +57,10 @@ export default function ExplorePage() {
         <div className="max-w-7xl mx-auto px-8 py-12">
           <div className="mb-8">
             <h1 className="font-headline text-4xl font-black text-on-surface uppercase tracking-tighter mb-4">
-              Explore Vehicles
+              {t('exploreTitle')}
             </h1>
             <p className="font-body text-on-surface-variant text-lg">
-              Browse our comprehensive database of automotive brands and models
+              {t('exploreSubtitle')}
             </p>
           </div>
 
@@ -84,25 +93,25 @@ export default function ExplorePage() {
                     {filteredBrands.length}
                   </div>
                   <div className="font-body text-[10px] uppercase tracking-widest text-on-surface-variant">
-                    Brands
+                    {language === 'tr' ? 'Marka' : 'Brands'}
                   </div>
                 </div>
                 <div className="h-12 w-px bg-outline-variant/20" />
                 <div>
                   <div className="font-headline text-2xl font-bold text-on-surface">
-                    {filteredBrands.reduce((sum, b) => sum + b.models, 0)}
+                    {filteredBrands.reduce((sum, b) => sum + b.models.length, 0)}
                   </div>
                   <div className="font-body text-[10px] uppercase tracking-widest text-on-surface-variant">
-                    Models
+                    {language === 'tr' ? 'Model' : 'Models'}
                   </div>
                 </div>
               </div>
               <div className="flex gap-3">
                 <button className="px-4 py-2 bg-surface-container-highest rounded-lg font-label text-[10px] uppercase tracking-widest text-on-surface hover:bg-surface-container transition-all">
-                  Sort A-Z
+                  {t('exploreSortAZ')}
                 </button>
                 <button className="px-4 py-2 bg-surface-container-highest rounded-lg font-label text-[10px] uppercase tracking-widest text-on-surface hover:bg-surface-container transition-all">
-                  Filter
+                  {t('exploreFilter')}
                 </button>
               </div>
             </div>
@@ -112,22 +121,22 @@ export default function ExplorePage() {
           <div className="grid grid-cols-2 md:grid-cols-4 lg:grid-cols-6 gap-6">
             {filteredBrands.map((brand) => (
               <Link
-                key={brand.name}
-                href={`/inventory?brand=${brand.name.toLowerCase()}`}
+                key={brand.slug}
+                href={`/inventory?brand=${brand.slug}`}
                 className="group"
               >
-                <div className="h-32 bg-surface-container rounded-xl flex flex-col items-center justify-center border border-outline-variant/5 group-hover:bg-surface-container-high group-hover:border-primary-container/20 transition-all duration-300 relative overflow-hidden">
+                <div className="h-32 bg-surface-container rounded-xl flex flex-col items-center justify-center border border-outline-variant/5 group-hover:bg-surface-container-high group-hover:border-primary-container/20 transition-all duration-300 relative overflow-hidden p-4">
                   <div className="absolute inset-0 bg-primary-container/5 opacity-0 group-hover:opacity-100 transition-opacity" />
-                  <span className="material-symbols-outlined text-4xl text-on-surface-variant group-hover:text-primary transition-colors mb-2">
+                  <span className="material-symbols-outlined text-4xl text-on-surface-variant group-hover:text-primary transition-colors z-10">
                     directions_car
                   </span>
-                  <p className="text-center font-label text-[10px] uppercase tracking-widest text-on-surface group-hover:text-primary transition-colors">
+                  <p className="text-center font-label text-[10px] uppercase tracking-widest text-on-surface group-hover:text-primary transition-colors z-10 mt-2">
                     {brand.name}
                   </p>
                 </div>
                 <div className="mt-2 text-center">
                   <p className="font-body text-[10px] text-on-surface-variant/60">
-                    {brand.models} models
+                    {brand.models.length} {language === 'tr' ? 'model' : 'models'}
                   </p>
                 </div>
               </Link>
@@ -137,7 +146,7 @@ export default function ExplorePage() {
           {/* Load More */}
           <div className="mt-12 text-center">
             <button className="px-8 py-3 bg-surface-container-low text-on-surface font-headline font-bold uppercase text-xs rounded-lg border border-outline-variant/20 hover:bg-surface-container-high transition-all active:scale-95">
-              Load More Brands
+              {t('exploreLoadMore')}
             </button>
           </div>
         </div>
