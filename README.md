@@ -100,6 +100,39 @@ auto-pulse/
 
 ---
 
+## ⚡ Vercel Deployment
+
+### Vercel Projesi Oluşturma
+
+1. **Vercel Dashboard**'a git: [vercel.com](https://vercel.com)
+2. **"Import Project"** → GitHub repo'sunu seç: `statelyx/autopulse`
+3. **Framework Preset**: Next.js (otomatik algılanır)
+4. **Build Komutu**: `npm run build`
+5. **Çıktı Dizini**: `.next`
+
+### Vercel Ortam Değişkenleri
+
+Vercel Dashboard → Settings → Environment Variables alanına aşağıdaki değişkenleri ekle:
+
+| Değişken | Değer | Ortam |
+|----------|-------|-------|
+| `NEXT_PUBLIC_APP_URL` | `https://autopulse.vercel.app` | Production |
+| `NEXT_PUBLIC_SUPABASE_URL` | Supabase proje URL'si | All |
+| `NEXT_PUBLIC_SUPABASE_ANON_KEY` | Supabase anon key | All |
+| `SUPABASE_SERVICE_ROLE_KEY` | Supabase service role | Production |
+| `HUGGINGFACE_API_KEY` | Hugging Face token | Production |
+| `RENDER_API_URL` | Backend API URL | All |
+
+> **ÖNEMLİ:** `NEXT_PUBLIC_*` öneki olan değişkenler client-side erişilebilir. Gizli anahtarlar asla bu önekle başlamamalı.
+
+### Preview Deployments
+
+- Her PR ve push'ta otomatik preview URL oluşturulur
+- Preview URL'ler: `https://autopulse-[hash].vercel.app`
+- `main` dalına merge ile production'a deploy
+
+---
+
 ## 🏁 Hızlı Başlangıç
 
 ```bash
@@ -138,7 +171,7 @@ Tarayıcıda [http://localhost:3000](http://localhost:3000) adresini aç.
 | Faz | Açıklama | Durum |
 |-----|----------|-------|
 | **Faz 1** | Repo İskeleti & İlk Push | ✅ Tamamlandı |
-| **Faz 2** | Veri Normalizasyonu & JSON Pipeline | ⏳ Bekliyor |
+| **Faz 2** | Vercel Hazırlığı & Deployment Planı | ✅ Tamamlandı |
 | **Faz 3** | Temel UI Bileşenleri & Tasarım Sistemi | ⏳ Bekliyor |
 | **Faz 4** | Dashboard & Ana Sayfa | ⏳ Bekliyor |
 | **Faz 5** | Araç Detay Sayfaları | ⏳ Bekliyor |
