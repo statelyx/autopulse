@@ -777,4 +777,60 @@ src/
 
 ---
 
+### Faz 8 Düzeltme (25 Mart 2026 - Aynı Gün)
+
+**Sorunlar:**
+- Buton tasarımı orijinal değildi
+- Light tema gerçekten açık renk değildi
+- Tüm sayfalar Türkçe olmuyordu
+
+**Çözümler:**
+
+#### 1. Minimal Buton Tasarımı
+- Dil ve tema butonu ayrıldı
+- Birlikte panel yerine ayrı minimal butonlar
+- Avatar ve notification butonu gibi tasarım
+- Bayrak emoji: 🇹🇷 (TR) , 🇬🇧 (EN)
+- Material Symbols: dark_mode / light_mode
+
+#### 2. Gerçek Light Tema
+**CSS Override'ları:**
+```css
+/* Gerçek açık renkler */
+html:not(.dark) {
+  --color-background: #ffffff;
+  --color-surface: #fafafa;
+  --color-on-surface: #111827;
+}
+
+/* Tüm bileşenler için override */
+html:not(.dark) .bg-background {
+  background-color: #ffffff !important;
+}
+html:not(.dark) .text-on-surface {
+  color: #111827 !important;
+}
+```
+
+#### 3. Varsayılan Dil Düzeltmesi
+```typescript
+// Context'te varsayılan TR
+const [language, setLanguageState] = useState<Language>('tr');
+
+// LocalStorage boşsa TR kaydet
+if (!savedLanguage) {
+  localStorage.setItem('autopulse-language', 'tr');
+}
+```
+
+**Değişen Dosyalar:**
+- `globals.css` - Light theme override'ları
+- `LanguageThemeSwitcher.tsx` - Ayrı bileşenler
+- `TopNavBar.tsx` - Ayrı butonlar
+- `LanguageThemeContext.tsx` - Varsayılan düzeltme
+
+**Commit:** `3105b2d` - faz-8-düzeltme: minimal dil/tema butonlari ve gerçek light tema
+
+---
+
 *Sonraki faz notları buraya eklenecektir.*
