@@ -60,7 +60,7 @@ export interface AIProviderInterface {
 // AI Analyzer arayüzü
 export interface AIAnalyzer {
   name: string;
-  analyze(data: any): Promise<any>;
+  analyze(data: unknown): Promise<unknown>;
 }
 
 // AI Prompt şablonları

@@ -1,22 +1,24 @@
-import type { Metadata } from "next";
-import { Inter, Space_Grotesk } from "next/font/google";
-import "./globals.css";
-import { LanguageThemeProvider } from "@/contexts/LanguageThemeContext";
+import type { Metadata } from 'next';
+import { Inter, Space_Grotesk } from 'next/font/google';
+
+import './globals.css';
+
+import { LanguageThemeProvider } from '@/contexts/LanguageThemeContext';
 
 const inter = Inter({
-  subsets: ["latin"],
-  variable: "--font-inter",
+  subsets: ['latin'],
+  variable: '--font-inter',
 });
 
 const spaceGrotesk = Space_Grotesk({
-  subsets: ["latin"],
-  variable: "--font-space-grotesk",
-  weight: ["300", "400", "500", "600", "700"],
+  subsets: ['latin'],
+  variable: '--font-space-grotesk',
+  weight: ['300', '400', '500', '600', '700'],
 });
 
 export const metadata: Metadata = {
-  title: "Auto Pulse — Premium Otomotiv Intelligence",
-  description: "Teknik araç verileri, gerçek kullanıcı yorumları ve yapay zeka analizleri.",
+  title: 'Auto Pulse - Premium Otomotiv Analiz Platformu',
+  description: 'Teknik araç verileri, canlı katalog, VIN çözümleme ve yapay zeka özetleri.',
 };
 
 export default function RootLayout({
@@ -33,9 +35,7 @@ export default function RootLayout({
         />
       </head>
       <body className={`${inter.variable} ${spaceGrotesk.variable} antialiased selection:bg-primary-container selection:text-on-primary-container`}>
-        <LanguageThemeProvider>
-          {children}
-        </LanguageThemeProvider>
+        <LanguageThemeProvider>{children}</LanguageThemeProvider>
       </body>
     </html>
   );

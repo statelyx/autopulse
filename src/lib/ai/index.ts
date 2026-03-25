@@ -41,6 +41,10 @@ import { HuggingFaceProvider } from './providers/huggingface';
 import { IssueAnalyzer } from './analyzers/issue-analyzer';
 import { VehicleAnalyzer } from './analyzers/vehicle-analyzer';
 
+type IssueInput = { title: string; description: string; category?: string };
+type ClusterInput = { title: string; description: string };
+type VehicleInput = { brand: string; model: string; year: number; price?: number; fuelType: string; horsepower?: number; acceleration?: number };
+
 class AIService {
   private static instance: AIService;
   private provider: HuggingFaceProvider;
@@ -70,28 +74,28 @@ class AIService {
   }
 
   // Issue analysis
-  async analyzeIssue(issue: { title: string; description: string; category?: string }) {
+  async analyzeIssue(issue: IssueInput) {
     return this.issueAnalyzer.analyzeIssue(issue);
   }
 
-  async analyzeMultipleIssues(issues: Array<{ title: string; description: string; category?: string }>) {
+  async analyzeMultipleIssues(issues: IssueInput[]) {
     return this.issueAnalyzer.analyzeMultipleIssues(issues);
   }
 
-  async clusterIssues(issues: Array<{ title: string; description: string }>) {
+  async clusterIssues(issues: ClusterInput[]) {
     return this.issueAnalyzer.clusterIssues(issues);
   }
 
   // Vehicle analysis
-  async generateMarketInsight(vehicles: any[]) {
+  async generateMarketInsight(vehicles: VehicleInput[]) {
     return this.vehicleAnalyzer.generateMarketInsight(vehicles);
   }
 
-  async compareVehicles(vehicle1: any, vehicle2: any) {
+  async compareVehicles(vehicle1: VehicleInput, vehicle2: VehicleInput) {
     return this.vehicleAnalyzer.compareVehicles(vehicle1, vehicle2);
   }
 
-  async predictPriceTrend(vehicles: any[]) {
+  async predictPriceTrend(vehicles: Array<{ brand: string; model: string; year: number; price?: number }>) {
     return this.vehicleAnalyzer.predictPriceTrend(vehicles);
   }
 }

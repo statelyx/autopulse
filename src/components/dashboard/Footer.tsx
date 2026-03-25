@@ -1,69 +1,61 @@
-/**
- * AUTO PULSE — Footer Component
- * Footer with network links and core load indicator
- * From stitch/stitch/auto_pulse_dashboard/code.html
- */
-
 export function Footer() {
   return (
     <footer className="w-full py-12 bg-background border-t border-outline-variant/15 mt-24">
       <div className="flex flex-col md:flex-row justify-between items-start md:items-center px-12 max-w-full gap-8">
         <div className="space-y-4">
           <div className="text-sm font-bold text-on-surface uppercase tracking-tighter font-headline">
-            Auto Pulse Intelligence
+            Auto Pulse
           </div>
           <p className="font-body text-[10px] uppercase tracking-widest text-on-surface/40 leading-relaxed">
-            © 2024 Auto Pulse Intelligence. All data points synchronized.
+            © 2026 Auto Pulse. Katalog ve AI katmanı senkronize çalışır.
             <br />
-            Autonomous monitoring in effect.
+            Sürekli izleme aktif.
           </p>
         </div>
 
         <div className="flex flex-wrap gap-8">
           <div className="flex flex-col gap-2">
             <span className="text-secondary-container font-body text-[10px] uppercase tracking-widest font-bold mb-2">
-              Network
+              Ağ
             </span>
             <a
               className="text-on-surface/40 font-body text-[10px] uppercase tracking-widest hover:text-secondary-container transition-opacity"
-              href="#"
+              href="/discover"
             >
-              Data Sources
+              Veri Kaynakları
             </a>
             <a
               className="text-on-surface/40 font-body text-[10px] uppercase tracking-widest hover:text-secondary-container transition-opacity"
-              href="#"
+              href="/intelligence"
             >
-              System Status
+              Sistem Durumu
             </a>
           </div>
           <div className="flex flex-col gap-2">
             <span className="text-secondary-container font-body text-[10px] uppercase tracking-widest font-bold mb-2">
-              Legal
+              Platform
             </span>
             <a
               className="text-on-surface/40 font-body text-[10px] uppercase tracking-widest hover:text-secondary-container transition-opacity"
-              href="#"
+              href="/about"
             >
-              Privacy Protocol
+              Hakkında
             </a>
             <a
               className="text-on-surface/40 font-body text-[10px] uppercase tracking-widest hover:text-secondary-container transition-opacity"
-              href="#"
+              href="/vin"
             >
-              Terms
+              VIN Servisi
             </a>
           </div>
         </div>
 
         <div className="bg-surface-container p-4 rounded-lg flex items-center gap-4">
           <div className="text-right">
-            <div className="text-[10px] uppercase tracking-widest text-on-surface/40">Core Load</div>
+            <div className="text-[10px] uppercase tracking-widest text-on-surface/40">Çekirdek Yük</div>
             <div className="text-xs font-headline font-bold text-primary-container">0.042 ms</div>
           </div>
-          <span className="material-symbols-outlined text-secondary-container" data-icon="terminal">
-            terminal
-          </span>
+          <span className="material-symbols-outlined text-secondary-container">terminal</span>
         </div>
       </div>
     </footer>

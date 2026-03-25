@@ -1,13 +1,8 @@
 'use client';
 
-/**
- * AUTO PULSE — SideNavBar Component
- * Fixed left sidebar navigation (hidden on mobile)
- * Interactive navigation with active states + Translations
- */
-
 import Link from 'next/link';
 import { usePathname } from 'next/navigation';
+
 import { useLanguageTheme } from '@/contexts/LanguageThemeContext';
 import { useTranslation } from '@/lib/i18n/translations';
 
@@ -18,7 +13,7 @@ export function SideNavBar() {
 
   const navItems = [
     { name: 'navHome', href: '/', icon: 'home' },
-    { name: 'navExplore', href: '/explore', icon: 'explore' },
+    { name: 'navExplore', href: '/discover', icon: 'explore' },
     { name: 'navCompare', href: '/compare', icon: 'compare_arrows' },
     { name: 'navSaved', href: '/saved', icon: 'bookmark' },
     { name: 'navAiInsights', href: '/ai-insights', icon: 'psychology' },
@@ -31,7 +26,7 @@ export function SideNavBar() {
           {language === 'tr' ? 'İstihbarat' : 'Intelligence'}
         </h3>
         <p className="text-[10px] text-on-surface/40 uppercase tracking-tighter mt-1">
-          v2.4 Live
+          v2.4 live
         </p>
       </div>
       <nav className="flex flex-col">
@@ -47,10 +42,8 @@ export function SideNavBar() {
                   : 'text-on-surface/40 hover:bg-surface-container hover:text-on-surface'
               }`}
             >
-              <span className="material-symbols-outlined text-sm" data-icon={item.icon}>
-                {item.icon}
-              </span>
-              {t(item.name as any)}
+              <span className="material-symbols-outlined text-sm">{item.icon}</span>
+              {t(item.name as never)}
             </Link>
           );
         })}

@@ -3,9 +3,9 @@
  * Email authentication ve guest mode için yardımcı fonksiyonlar
  */
 
-import { supabase, isSupabaseConfigured } from '@/lib/supabase/client';
+import { supabase } from '@/lib/supabase/client';
 import { isGuestMode as checkGuestMode } from '@/lib/supabase/client';
-import type { AuthError, User } from '@supabase/supabase-js';
+import type { Session, User } from '@supabase/supabase-js';
 
 // Re-export isGuestMode for convenience
 export const isGuestMode = checkGuestMode;
@@ -122,12 +122,12 @@ export async function getSession() {
 /**
  * Auth state değişikliklerini dinle
  */
-export function onAuthStateChange(callback: (event: string, session: any) => void) {
+export function onAuthStateChange(callback: (event: string, session: Session | null) => void) {
   if (isGuestMode() || !supabase) {
     return { data: { subscription: null } };
   }
 
-  return supabase.auth.onAuthStateChange((event: string, session: any) => {
+  return supabase.auth.onAuthStateChange((event: string, session: Session | null) => {
     callback(event, session);
   });
 }

@@ -8,9 +8,10 @@
 
 import Link from 'next/link';
 import { usePathname } from 'next/navigation';
-import { useLanguageTheme } from '@/contexts/LanguageThemeContext';
-import { useTranslation } from '@/lib/i18n/translations';
+
 import { LanguageSwitcher, ThemeSwitcher } from '@/components/controls';
+import { useLanguageTheme } from '@/contexts/LanguageThemeContext';
+import { type TranslationKey, useTranslation } from '@/lib/i18n/translations';
 
 export function TopNavBar() {
   const pathname = usePathname();
@@ -42,7 +43,7 @@ export function TopNavBar() {
                     : 'text-on-surface/60 hover:text-primary-container'
                 }`}
               >
-                {t(item.name as any)}
+                {t(item.name as TranslationKey)}
               </Link>
             );
           })}

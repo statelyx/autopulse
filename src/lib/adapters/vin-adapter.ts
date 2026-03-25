@@ -34,6 +34,22 @@ export interface VINProvider {
   isConfigured(): boolean;
 }
 
+type VPICDecodedRecord = {
+  VIN?: string;
+  Make?: string;
+  Model?: string;
+  ModelYear?: string;
+  Trim?: string;
+  BodyClass?: string;
+  EngineModel?: string;
+  TransmissionStyle?: string;
+  DriveType?: string;
+  FuelTypePrimary?: string;
+  Manufacturer?: string;
+  PlantCountry?: string;
+  Series?: string;
+};
+
 // vPIC API Provider (NHTSA - USA Government)
 export class VPICProvider implements VINProvider {
   name = 'vpic';
@@ -53,7 +69,7 @@ export class VPICProvider implements VINProvider {
         throw new Error(`vPIC API error: ${response.statusText}`);
       }
 
-      const data = await response.json();
+      const data = await response.json() as { Results?: VPICDecodedRecord[] };
       const results = data.Results;
 
       if (!results || results.length === 0) {
@@ -64,25 +80,20 @@ export class VPICProvider implements VINProvider {
       }
 
       // vPIC API'den değerleri çıkar
-      const getValue = (variableId: string) => {
-        const result = results.find((r: any) => r.VariableId === variableId);
-        return result?.Value;
-      };
-
       return {
-        vin: getValue('VIN') || vin,
-        make: getValue('Make'),
-        model: getValue('Model'),
-        year: getValue('ModelYear') ? parseInt(getValue('ModelYear')) : undefined,
-        trim: getValue('Trim'),
-        bodyType: getValue('BodyClass'),
-        engine: getValue('EngineModel'),
-        transmission: getValue('TransmissionStyle'),
-        driveType: getValue('DriveType'),
-        fuelType: getValue('FuelTypePrimary'),
-        manufacturer: getValue('Manufacturer'),
-        plant: getValue('PlantCountry'),
-        series: getValue('Series'),
+        vin: results[0]?.VIN || vin,
+        make: results[0]?.Make,
+        model: results[0]?.Model,
+        year: results[0]?.ModelYear ? parseInt(results[0].ModelYear, 10) : undefined,
+        trim: results[0]?.Trim,
+        bodyType: results[0]?.BodyClass,
+        engine: results[0]?.EngineModel,
+        transmission: results[0]?.TransmissionStyle,
+        driveType: results[0]?.DriveType,
+        fuelType: results[0]?.FuelTypePrimary,
+        manufacturer: results[0]?.Manufacturer,
+        plant: results[0]?.PlantCountry,
+        series: results[0]?.Series,
       };
     } catch (error) {
       console.error('vPIV API hatası:', error);

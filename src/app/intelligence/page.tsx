@@ -1,14 +1,79 @@
 'use client';
 
-/**
- * AUTO PULSE — İstihbarat Sayfası
- * Yapay zeka destekli otomotiv analitiği
- */
-
-import { TopNavBar, SideNavBar } from '@/components/dashboard';
+import { useEffect, useState } from 'react';
 import Link from 'next/link';
 
+import { SideNavBar, TopNavBar } from '@/components/dashboard';
+import { useCatalog } from '@/hooks/useCatalog';
+
+type IssueResponse = {
+  issues: Array<{
+    id: string;
+    title: string;
+    description: string;
+    reference: string;
+    analysis: {
+      priority: 'low' | 'medium' | 'high';
+      summary: string;
+    };
+  }>;
+};
+
+type SummaryResponse = {
+  summary: string;
+  insights: string[];
+  recommendations: string[];
+};
+
 export default function IntelligencePage() {
+  const { vehicles, stats } = useCatalog({ limit: 40 });
+  const [summary, setSummary] = useState<SummaryResponse | null>(null);
+  const [issues, setIssues] = useState<IssueResponse['issues']>([]);
+
+  useEffect(() => {
+    const controller = new AbortController();
+
+    async function load() {
+      try {
+        const [summaryResponse, issuesResponse] = await Promise.all([
+          fetch('/api/ai/summary', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({
+              query: 'İstihbarat merkezi özeti',
+              vehicleIds: vehicles.slice(0, 6).map((vehicle) => vehicle.id),
+            }),
+            signal: controller.signal,
+          }),
+          fetch('/api/ai/issues', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ limit: 4 }),
+            signal: controller.signal,
+          }),
+        ]);
+
+        if (summaryResponse.ok) {
+          setSummary(await summaryResponse.json());
+        }
+
+        if (issuesResponse.ok) {
+          const issuePayload = await issuesResponse.json();
+          setIssues(issuePayload.issues ?? []);
+        }
+      } catch {
+        setSummary(null);
+        setIssues([]);
+      }
+    }
+
+    if (vehicles.length > 0) {
+      load();
+    }
+
+    return () => controller.abort();
+  }, [vehicles]);
+
   return (
     <>
       <TopNavBar />
@@ -21,81 +86,84 @@ export default function IntelligencePage() {
               Yapay Zeka İstihbarat Merkezi
             </h1>
             <p className="font-body text-on-surface-variant text-lg">
-              Gelişmiş analitik ve öngörü modelleme
+              Canlı katalog, issue sinyalleri ve özet analizi tek panelde.
             </p>
           </div>
 
-          {/* Boş Durum */}
-          <div className="flex flex-col items-center justify-center py-24">
-            <div className="w-24 h-24 rounded-full bg-surface-container-highest flex items-center justify-center mb-8">
-              <span className="material-symbols-outlined text-on-surface/40 text-5xl">
-                psychology
-              </span>
-            </div>
-
-            <h2 className="font-headline text-2xl font-bold text-on-surface uppercase mb-4 text-center">
-              Henüz İstihbarat Raporu Yok
-            </h2>
-
-            <p className="font-body text-on-surface-variant text-center max-w-md mb-8">
-              Araçları analiz etmeye başlayarak yapay zeka destekli içgörüler oluşturun.
-              Modelleri karşılaştırın, trendleri takip edin ve otomotiv verilerinde kalıplar keşfedin.
-            </p>
-
-            <div className="flex gap-4">
-              <Link
-                href="/discover"
-                className="px-6 py-3 bg-primary-container text-on-primary-fixed font-headline font-bold uppercase text-xs rounded-lg hover:brightness-110 transition-all active:scale-95"
-              >
-                Araçları Keşfet
-              </Link>
-              <Link
-                href="/compare"
-                className="px-6 py-3 bg-surface-container text-on-surface font-headline font-bold uppercase text-xs rounded-lg border border-outline-variant/20 hover:bg-surface-container-high transition-all active:scale-95"
-              >
-                Karşılaştırmayı Başlat
-              </Link>
-            </div>
-          </div>
-
-          {/* Hızlı İşlemler */}
-          <div className="mt-12 grid grid-cols-1 md:grid-cols-3 gap-6">
+          <div className="grid grid-cols-1 lg:grid-cols-3 gap-6 mb-10">
             {[
-              {
-                title: 'Piyasa Analizi',
-                description: 'Gerçek zamanlı fiyat trendleri ve değerleme verileri',
-                icon: 'trending_up',
-                action: 'Analitiği Görüntüle',
-              },
-              {
-                title: 'Arıza Tahmini',
-                description: 'Yapay zeka destekli güvenilirlik öngörüsü',
-                icon: 'warning',
-                action: 'Modelleri Kontrol Et',
-              },
-              {
-                title: 'Karşılaştırmalı Raporlar',
-                description: 'Yan yana araç istihbaratı',
-                icon: 'compare_arrows',
-                action: 'Şimdi Karşılaştır',
-              },
-            ].map((card) => (
+              { label: 'Toplam kayıt', value: vehicles.length },
+              { label: 'Elektrikli araç', value: stats?.electricVehicles ?? 0 },
+              { label: 'Ortalama fiyat', value: `$${(stats?.avgPrice ?? 0).toLocaleString()}` },
+            ].map((item) => (
+              <div key={item.label} className="bg-surface-container-low rounded-xl p-6 border border-outline-variant/10">
+                <div className="font-label text-[10px] uppercase tracking-widest text-on-surface-variant mb-2">
+                  {item.label}
+                </div>
+                <div className="font-headline text-3xl font-bold text-on-surface">{item.value}</div>
+              </div>
+            ))}
+          </div>
+
+          <div className="bg-surface-container-low rounded-xl p-8 border border-primary-container/20 mb-10">
+            <div className="flex items-center justify-between mb-6">
+              <h2 className="font-headline text-2xl font-bold text-on-surface uppercase">
+                Özet rapor
+              </h2>
+              <Link href="/ai-insights" className="text-xs uppercase tracking-widest text-primary hover:underline">
+                Detaylı AI sayfası
+              </Link>
+            </div>
+            <p className="font-body text-on-surface mb-6">
+              {summary?.summary ?? 'Özet hazırlanıyor.'}
+            </p>
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+              <div>
+                <div className="font-label text-[10px] uppercase tracking-widest text-on-surface-variant mb-2">
+                  İçgörüler
+                </div>
+                <div className="space-y-2">
+                  {(summary?.insights ?? []).map((item) => (
+                    <div key={item} className="text-sm text-on-surface-variant">• {item}</div>
+                  ))}
+                </div>
+              </div>
+              <div>
+                <div className="font-label text-[10px] uppercase tracking-widest text-on-surface-variant mb-2">
+                  Sonraki adımlar
+                </div>
+                <div className="space-y-2">
+                  {(summary?.recommendations ?? []).map((item) => (
+                    <div key={item} className="text-sm text-on-surface-variant">• {item}</div>
+                  ))}
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+            {issues.map((issue) => (
               <div
-                key={card.title}
-                className="bg-surface-container-low rounded-xl p-6 border border-outline-variant/10 hover:border-primary-container/20 transition-all group"
+                key={issue.id}
+                className="bg-surface-container-low rounded-xl p-6 border border-outline-variant/10 hover:border-primary-container/20 transition-all"
               >
-                <span className="material-symbols-outlined text-primary-container text-4xl mb-4">
-                  {card.icon}
-                </span>
+                <div className="flex items-center justify-between mb-4">
+                  <span className="font-label text-[10px] uppercase tracking-widest text-on-surface-variant">
+                    {issue.reference}
+                  </span>
+                  <span className="px-2 py-1 bg-primary-container/10 text-primary-container rounded text-[10px] uppercase tracking-widest font-bold">
+                    {issue.analysis.priority}
+                  </span>
+                </div>
                 <h3 className="font-headline text-lg font-bold text-on-surface uppercase mb-2">
-                  {card.title}
+                  {issue.title}
                 </h3>
-                <p className="font-body text-on-surface-variant text-sm mb-4">
-                  {card.description}
+                <p className="font-body text-on-surface-variant text-sm mb-3">
+                  {issue.description}
                 </p>
-                <button className="font-label text-[10px] uppercase tracking-widest text-primary group-hover:underline transition-all">
-                  {card.action}
-                </button>
+                <p className="font-body text-on-surface text-sm">
+                  {issue.analysis.summary}
+                </p>
               </div>
             ))}
           </div>

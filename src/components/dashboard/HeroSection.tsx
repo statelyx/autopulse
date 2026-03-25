@@ -93,7 +93,7 @@ export function HeroSection() {
             <div className="absolute top-full left-0 w-full mt-4 bg-surface-container-low border border-outline-variant/15 rounded-xl z-20 overflow-hidden shadow-2xl">
               <div className="px-6 py-4 border-b border-outline-variant/5">
                 <span className="font-label text-[10px] uppercase tracking-widest text-on-surface-variant/60">
-                  Trending Assets
+                  Öne çıkan sorgular
                 </span>
               </div>
               <div className="p-2 grid grid-cols-1 md:grid-cols-2 gap-2">
@@ -107,7 +107,7 @@ export function HeroSection() {
                     <div className="text-xs font-bold font-headline uppercase group-hover/item:text-primary transition-colors">
                       Lamborghini Revuelto
                     </div>
-                    <div className="text-[10px] text-on-surface-variant/40">2024 Performance Segment</div>
+                    <div className="text-[10px] text-on-surface-variant/40">2024 performans segmenti</div>
                   </div>
                 </div>
                 <div className="flex items-center gap-4 p-3 hover:bg-surface-container-highest rounded-lg cursor-pointer transition-colors group/item">
@@ -120,7 +120,7 @@ export function HeroSection() {
                     <div className="text-xs font-bold font-headline uppercase group-hover/item:text-primary transition-colors">
                       Tesla Model S Plaid
                     </div>
-                    <div className="text-[10px] text-on-surface-variant/40">2023 EV Market</div>
+                    <div className="text-[10px] text-on-surface-variant/40">2023 elektrikli pazar odağı</div>
                   </div>
                 </div>
               </div>
