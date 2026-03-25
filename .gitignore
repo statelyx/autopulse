@@ -1,0 +1,72 @@
+# ========================
+# AUTO PULSE — .gitignore
+# ========================
+
+# Bağımlılıklar
+node_modules/
+.pnp/
+.pnp.js
+.yarn/install-state.gz
+
+# Test
+coverage/
+
+# Next.js
+.next/
+out/
+
+# Production Build
+build/
+dist/
+
+# Ortam Değişkenleri
+.env
+.env.local
+.env.development.local
+.env.test.local
+.env.production.local
+.env*.local
+
+# Hata Kayıtları
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+pnpm-debug.log*
+
+# IDE & Editör
+.vscode/
+.idea/
+*.sublime-project
+*.sublime-workspace
+*.swp
+*.swo
+*~
+
+# İşletim Sistemi
+.DS_Store
+Thumbs.db
+Desktop.ini
+ehthumbs.db
+
+# TypeScript
+*.tsbuildinfo
+next-env.d.ts
+
+# Vercel
+.vercel
+
+# Debug
+.debug/
+
+# Turbopack
+.turbo/
+
+# PWA
+sw.js
+workbox-*.js
+
+# Misc
+*.log
+*.pid
+*.seed
+*.pid.lock

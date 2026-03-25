@@ -1,0 +1,55 @@
+# AUTO PULSE - Ürün Gereksinim Belgesi (PRD) & Mimari Tasarım
+
+## 1. Vizyon
+Auto Pulse; teknik verileri, gerçek kullanıcı yorumlarını ve yapay zeka analizlerini bir araya getiren, "Premium Otomotiv Intelligence" platformudur. Apple, Porsche ve Lucid estetiğini, Fintech dashboard fonksiyonelliği ile birleştirir.
+
+## 2. Mimari Karar Özeti (Faz-1: Serverless & Data-Driven)
+*   **Framework:** Next.js 14+ (App Router) - SEO ve performans için.
+*   **Dil:** TypeScript (Strict Mode) - Tip güvenliği ve ölçeklenebilirlik.
+*   **Stil:** Tailwind CSS + Framer Motion - Akıcı, premium animasyonlar.
+*   **Bileşenler:** shadcn/ui (Customized) - Tutarlı ve kaliteli UI.
+*   **Veri Yönetimi:** Local JSON & Static Assets - İlk fazda DB bağımlılığını ortadan kaldırır.
+*   **State:** Zustand - Hafif ve hızlı global state yönetimi.
+*   **Mimari Desen:** Service-Adapter Pattern - Gelecekteki API geçişini kolaylaştırır.
+
+## 3. Klasör Yapısı (Future-Ready)
+```text
+auto-pulse/
+├── app/                    # Next.js App Router (Routes & Pages)
+│   ├── (dashboard)/        # Dashboard layout & routes
+│   ├── vehicles/           # [brand]/[model]/[year] detay sayfaları
+│   └── api/                # Route Handlers (Future API Stubs)
+├── components/             # UI Components
+│   ├── shared/             # Ortak bileşenler (Button, Input, etc.)
+│   ├── vehicle/            # Araç spesifik bileşenler (Card, Specs, AI Summary)
+│   ├── search/             # Premium Search & Autocomplete
+│   └── layout/             # Navigation, Footer, Hero
+├── data/                   # Statik Veri Katmanı
+│   ├── brands/             # Marka logoları (SVG)
+│   ├── normalized/         # Normalize edilmiş araç verileri (JSON)
+│   └── reviews/            # Örnek kullanıcı yorumları & AI analizleri
+├── lib/                    # Core Mantık
+│   ├── adapters/           # Veri kaynağı adaptörleri (NHTSA, Local, etc.)
+│   ├── services/           # Business logic (VehicleService, AIService)
+│   ├── utils/              # Helper fonksiyonlar (Slugify, Formatters)
+│   └── constants/          # App constants & Config
+├── types/                  # Global TypeScript tanımları
+└── public/                 # Statik varlıklar (Hero images, Fonts)
+```
+
+## 4. Veri & Repo Stratejisi
+*   **Veri Kaynağı:** `open-vehicle-db` ve `automotive-model-year-data` temel hiyerarşi için kullanılacak.
+*   **Normalizasyon:** Tüm veriler `Brand -> Model -> Year -> Trim` canonical şemasına dönüştürülecek.
+*   **Logolar:** `car-logos-dataset` üzerinden SVG formatında çekilecek.
+*   **VIN:** `pyvin` ve `vpic-api` mantığı, bir service abstraction olarak koda dahil edilecek.
+
+## 5. Tasarım Planı (Hero & Dashboard)
+*   **Hero:** Karanlık bir atmosferde, farları açık bir Lamborghini (veya benzeri agresif silüet).
+*   **Efekt:** 5 saniyede bir CSS/Framer Motion ile selektör (high-beam) efekti.
+*   **Arama:** Marka harfi yazıldığında açılan, görsel ağırlıklı premium dropdown.
+*   **Renk Paleti:** Obsidian Black (#0A0A0A), Neon Amber (#FFBF00), Graphite (#2D2D2D).
+
+## 6. Gelecek Planı (Faz-2)
+*   **Backend:** NestJS / Fastify.
+*   **DB:** PostgreSQL (Prisma ORM) + Redis (Caching).
+*   **AI:** Python tabanlı mikroservis (FastAPI) + BullMQ (Scraper jobs).
