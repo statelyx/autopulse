@@ -11,6 +11,7 @@ import { useParams, useRouter } from 'next/navigation';
 import { useLanguageTheme } from '@/contexts/LanguageThemeContext';
 import { getVehicleById } from '@/lib/data/vehicle-service';
 import { getBrandLogo } from '@/lib/data/logo-service';
+import { useSavedVehicles } from '@/hooks/useLocalStorage';
 import Link from 'next/link';
 import Image from 'next/image';
 
@@ -20,8 +21,10 @@ export default function VehicleDetailPage() {
   const router = useRouter();
   const [vehicle, setVehicle] = useState<any>(null);
   const [isLoading, setIsLoading] = useState(true);
+  const [savedVehicles, setSavedVehicles] = useSavedVehicles();
   const [saving, setSaving] = useState(false);
-  const [saved, setSaved] = useState(false);
+
+  const isSaved = vehicle && savedVehicles.includes(vehicle.id);
 
   useEffect(() => {
     const loadVehicle = () => {
@@ -41,12 +44,21 @@ export default function VehicleDetailPage() {
   }, [params.id]);
 
   const handleSave = () => {
+    if (!vehicle) return;
+
     setSaving(true);
-    // Simulate save
-    setTimeout(() => {
-      setSaved(true);
-      setSaving(false);
-    }, 1000);
+
+    if (isSaved) {
+      // Remove from saved
+      const updated = savedVehicles.filter(id => id !== vehicle.id);
+      setSavedVehicles(updated);
+    } else {
+      // Add to saved
+      const updated = [...savedVehicles, vehicle.id];
+      setSavedVehicles(updated);
+    }
+
+    setSaving(false);
   };
 
   const handleCompare = () => {
@@ -154,11 +166,11 @@ export default function VehicleDetailPage() {
                   className="px-4 py-2 bg-surface-container text-on-surface font-label text-[10px] uppercase tracking-widest rounded-lg hover:bg-surface-container-high transition-all active:scale-95 disabled:opacity-50"
                 >
                   <span className="material-symbols-outlined text-sm align-middle mr-1">
-                    {saved ? 'bookmark_added' : 'bookmark'}
+                    {isSaved ? 'bookmark_added' : 'bookmark'}
                   </span>
                   {saving
                     ? (language === 'tr' ? 'Kaydediliyor...' : 'Saving...')
-                    : (saved
+                    : (isSaved
                       ? (language === 'tr' ? 'Kaydedildi' : 'Saved')
                       : (language === 'tr' ? 'Kaydet' : 'Save')
                     )
