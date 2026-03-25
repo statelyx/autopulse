@@ -27,12 +27,14 @@
 | 9 | Supabase Marka Verisi / Tüm Markalar Aktif Getirme | 25.03.2026 | 25.03.2026 | ✅ Tamamlandı |
 | 10 | Marka-Model-Yıl Akışı / Supabase Bağlantısı | 25.03.2026 | 25.03.2026 | ✅ Tamamlandı |
 | 11 | Logo Verisi / Seçimde Doğru Logo Gösterme | 25.03.2026 | 25.03.2026 | ✅ Tamamlandı |
-| 12 | AI Entegrasyonu | — | — | ⏳ Bekliyor |
-| 13 | Kullanıcı Yorumları | — | — | ⏳ Bekliyor |
-| 13 | Performans Optimizasyonu | — | — | ⏳ Bekliyor |
-| 14 | SEO & Meta Veriler | — | — | ⏳ Bekliyor |
-| 15 | Test & QA | — | — | ⏳ Bekliyor |
-| 16 | Production Deploy | — | — | ⏳ Bekliyor |
+| 12 | Gerçek Veri Entegrasyonu / Inventory & Vehicle Detail | 25.03.2026 | 25.03.2026 | ✅ Tamamlandı |
+| 13 | Saved / Compare / AI Insights / İşlevsel Modüller | 25.03.2026 | 25.03.2026 | ✅ Tamamlandı |
+| 14 | AI Entegrasyonu | — | — | ⏳ Bekliyor |
+| 15 | Kullanıcı Yorumları | — | — | ⏳ Bekliyor |
+| 16 | Performans Optimizasyonu | — | — | ⏳ Bekliyor |
+| 17 | SEO & Meta Veriler | — | — | ⏳ Bekliyor |
+| 18 | Test & QA | — | — | ⏳ Bekliyor |
+| 19 | Production Deploy | — | — | ⏳ Bekliyor |
 
 ---
 
@@ -1477,6 +1479,301 @@ src/app/
 - [ ] Compare sayfası entegrasyonu
 - [ ] Saved sayfası entegrasyonu
 - [ ] Supabase araç verisi
+
+---
+
+## Faz 13 — Saved / Compare / AI Insights / İşlevsel Modüller
+
+**Tarih:** 25 Mart 2026
+**Amaç:** Saved, Compare ve AI Insights modüllerini gerçek araç verisi ile işlevsel hale getirmek.
+
+### Yapılanlar
+- [x] localStorage hook (useLocalStorage) oluşturuldu
+- [x] Saved sayfası gerçek araç verisiyle çalışır hale getirildi
+- [x] Compare sayfası URL parametreleri ve localStorage ile çalışır hale getirildi
+- [x] AI Insights sayfası gerçek araç istatistikleriyle güncellendi
+- [x] Vehicle detail sayfası Save butonu işlevsel hale getirildi
+- [x] Suspense boundary sorunları giderildi
+
+### Dosyalar
+
+**Yeni Dosya:**
+- `src/hooks/useLocalStorage.ts` — localStorage yönetimi için custom hook
+
+**Güncellenen Dosyalar:**
+- `src/app/saved/page.tsx` — localStorage entegrasyonu, gerçek araç verisi
+- `src/app/compare/page.tsx` — URL parametreleri, slot sistemi, fiyat hesaplama
+- `src/app/ai-insights/page.tsx` — gerçek araç istatistikleri, ortalama hesaplamalar
+- `src/app/vehicle/[id]/page.tsx` — Save butonu localStorage entegrasyonu
+
+### Teknik Detaylar
+
+#### 1. LocalStorage Hook
+
+```typescript
+// src/hooks/useLocalStorage.ts
+export function useLocalStorage<T>(key: string, initialValue: T) {
+  const [storedValue, setStoredValue] = useState<T>(() => {
+    if (typeof window === 'undefined') return initialValue;
+    const item = window.localStorage.getItem(key);
+    return item ? JSON.parse(item) : initialValue;
+  });
+
+  const setValue = (value: T | ((val: T) => T)) => {
+    const valueToStore = value instanceof Function ? value(storedValue) : value;
+    setStoredValue(valueToStore);
+    window.localStorage.setItem(key, JSON.stringify(valueToStore));
+  };
+
+  return [storedValue, setValue] as const;
+}
+
+export function useSavedVehicles() {
+  return useLocalStorage<string[]>('autopulse-saved-vehicles', []);
+}
+
+export function useCompareVehicles() {
+  return useLocalStorage<string[]>('autopulse-compare-vehicles', []);
+}
+```
+
+#### 2. Saved Sayfası
+
+**Özellikler:**
+- ✅ localStorage'dan kayıtlı araç ID'lerini okuma
+- ✅ getVehicleById ile gerçek araç verisi çekme
+- ✅ Araç kartları ile marka logosu, model, yıl, güç, hız bilgileri
+- ✅ Araç kaldırma butonu
+- ✅ Empty state (kayıtlı araç yok)
+- ✅ Loading state
+- ✅ Detay ve Compare linkleri
+
+**Veri Akışı:**
+```
+useSavedVehicles() → savedVehicles state
+        ↓
+savedVehicles.map(id => getVehicleById(id))
+        ↓
+Araç Kartları Gösterimi
+```
+
+#### 3. Compare Sayfası
+
+**Özellikler:**
+- ✅ 3 slot sistem (3 araca kadar karşılaştırma)
+- ✅ URL parametresi ile araç ekleme (?add=vehicle-id)
+- ✅ localStorage ile karşılaştırma listesi yönetimi
+- ✅ Araç kaldırma butonu
+- ✅ Fiyat farkı hesaplama (Price Delta)
+- ✅ Comparison Results bölümü (2+ araç)
+- ✅ Popular Comparisons önerileri
+- ✅ Empty slot'lar için inventory linki
+
+**Slot Yapısı:**
+```typescript
+type ComparisonSlot = {
+  id: number;
+  vehicle: any;
+};
+```
+
+**URL Akışı:**
+```
+Vehicle Detail → Compare Butonu
+        ↓
+/compare?add=tesla-model-s-plaid-2024
+        ↓
+useSearchParams() → add parametresini yakala
+        ↓
+localStorage'a araç ID'sini ekle
+        ↓
+Slot'ları doldur
+```
+
+**Suspense Boundary:**
+```typescript
+export default function ComparePage() {
+  return (
+    <main>
+      <Suspense fallback={<LoadingUI />}>
+        <CompareContentWrapper />
+      </Suspense>
+    </main>
+  );
+}
+
+function CompareContentWrapper() {
+  const searchParams = useSearchParams();
+  return <CompareContent searchParams={searchParams} />;
+}
+```
+
+#### 4. AI Insights Sayfası
+
+**Özellikler:**
+- ✅ Gerçek araç verilerine dayalı insights
+- ✅ 5 farklı insight kategorisi (Market Trend, Technical Analysis, Price Forecast, vb.)
+- ✅ Her insight için confidence score
+- ✅ İlgili araç badge'leri
+- ✅ Vehicle Data Analysis bölümü
+- ✅ İstatistik hesaplamalar (ortalama güç, hız, fiyat)
+- ✅ Live Analysis indicator
+
+**İstatistik Hesaplamalar:**
+```typescript
+const vehicles = getVehicles();
+
+// Araç sayısı
+vehicles.length
+
+// Elektrikli araç sayısı
+vehicles.filter(v => v.fuelType === 'Electric').length
+
+// Performans araçları (500+ hp)
+vehicles.filter(v => v.horsepower > 500).length
+
+// Ortalama güç
+Math.round(vehicles.reduce((sum, v) => sum + (v.horsepower || 0), 0) / vehicles.length)
+
+// Ortalama hız
+Math.round(vehicles.reduce((sum, v) => sum + (v.acceleration || 0), 0) / vehicles.length * 10) / 10
+
+// Ortalama fiyat
+Math.round(vehicles.reduce((sum, v) => sum + (v.price || 0), 0) / vehicles.length)
+```
+
+**Insights Örnekleri:**
+1. **Elektrikli Araç Pazarı Dönüşümü** — Tesla Model S Plaid ve Porsche Taycan lider
+2. **Hibrit Şanzıman Güvenilirliği** — Chevrolet Corvette E-Ray ve Toyota RAV4 Hybrid
+3. **Lüks Segment Değerlemesi** — Nissan GT-R ve Honda Civic Type R yatırım potansiyeli
+4. **Performans Segment Rekabeti** — Porsche 911 vs BMW M3 karşılaştırması
+5. **Süper SUV Trendi** — Lamborghini Urus, Porsche Cayenne, Audi e-tron GT
+
+#### 5. Vehicle Detail Save Butonu
+
+**Özellikler:**
+- ✅ localStorage entegrasyonu
+- ✅ Kayıt/Kaldırma toggle
+- ✅ Icon değişimi (bookmark → bookmark_added)
+- ✅ Buton metni güncellemesi (Save → Saved)
+- ✅ Saving state (yükleniyor)
+
+**İşlev:**
+```typescript
+const isSaved = vehicle && savedVehicles.includes(vehicle.id);
+
+const handleSave = () => {
+  if (isSaved) {
+    // Remove from saved
+    const updated = savedVehicles.filter(id => id !== vehicle.id);
+    setSavedVehicles(updated);
+  } else {
+    // Add to saved
+    const updated = [...savedVehicles, vehicle.id];
+    setSavedVehicles(updated);
+  }
+};
+```
+
+### Kullanıcı Akışı
+
+**Saved Akışı:**
+```
+Vehicle Detail → Save Butonu
+        ↓
+localStorage'a araç ID'sini ekle
+        ↓
+/saved sayfasında araç görünüyor
+        ↓
+Remove butonu ile kaldır
+```
+
+**Compare Akışı:**
+```
+Vehicle Detail → Compare Butonu
+        ↓
+/compare?add=vehicle-id
+        ↓
+Slot'lara araç ekleniyor
+        ↓
+Comparison Results gösteriliyor
+        ↓
+Price Delta hesaplanıyor
+        ↓
+Generate Full Report / Export Data
+```
+
+**AI Insights Akışı:**
+```
+/ai-insights sayfası
+        ↓
+Gerçek araç verisi ile insights
+        ↓
+Vehicle Data Analysis (istatistikler)
+        ↓
+İlgili Araç badge'leri tıklanabilir
+        ↓
+Vehicle Detail sayfasına yönlendirme
+```
+
+### Kod İstatistikleri
+
+**Değişiklikler:**
+- 5 dosya değişti
+- 624 satır eklendi
+- 316 satır silindi
+
+**TypeScript Hataları (Giderildi):**
+- ❌ `getVehicleById` import eksik (ai-insights)
+- ❌ `saved` değişkeni tanımsız (vehicle detail → `isSaved`)
+- ❌ Suspense boundary eksik (compare)
+
+**Build Durumu:**
+```bash
+✓ Type Check: Başarılı
+✓ Build: 18 routes
+✓ Git Commit: 9ac6d32
+✓ Git Push: origin/main
+```
+
+### Kullanıcı Deneyimi
+
+**Önce (Faz 12):**
+- Saved sayfası placeholder
+- Compare sayfası boş
+- AI Insights static/hardcoded veri
+- Save butonu mock
+- Compare butonu çalışmıyordu
+
+**Şimdi (Faz 13):**
+- Saved sayfası gerçek araç verisiyle çalışıyor
+- Compare sayfası URL parametreleri ile çalışıyor
+- AI Insights gerçek araç istatistikleriyle güncel
+- Save butonu gerçekten kaydediyor
+- Compare butonu karşılaştırma listesine ekliyor
+- Tüm sayfalar arası akış tamamlanmış
+
+**Özellikler:**
+- ✅ localStorage kalıcı depolama
+- ✅ 3 slot'luk karşılaştırma sistemi
+- ✅ Fiyat farkı hesaplama
+- ✅ AI Insights gerçek veri tabanlı
+- ✅ Araç istatistikleri (ortalama güç, hız, fiyat)
+- ✅ Confidence score'lu insights
+- ✅ Popular Comparisons önerileri
+- ✅ Empty/loading states
+- ✅ Suspense boundary'ler
+
+### Gelecek Geliştirmeler
+
+- [ ] Daha fazla insight kategorisi
+- [ ] AI powered recommendations
+- [ ] Compare PDF export
+- [ ] Advanced comparison filters
+- [ ] User comments/ratings
+- [ ] Share comparison links
+- [ ] AI chat interface
+- [ ] Price prediction models
 
 ---
 
