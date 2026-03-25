@@ -20,12 +20,12 @@
 | 2 | Vercel Hazırlığı & Deployment Planı | 25.03.2026 | 25.03.2026 | ✅ Tamamlandı |
 | 3 | Render Uyumlu Backend İskeleti | 25.03.2026 | 25.03.2026 | ✅ Tamamlandı |
 | 4 | Next.js Temel Uygulama İskeleti / Premium Shell | 25.03.2026 | 25.03.2026 | ✅ Tamamlandı |
-| 5 | Araç Veri Yapısı & Entegrasyon | — | — | ⏳ Bekliyor |
-| 6 | Arama & Filtreleme Sistemi | — | — | ⏳ Bekliyor |
-| 7 | Araç Detay Sayfaları | — | — | ⏳ Bekliyor |
-| 8 | AI Entegrasyonu | — | — | ⏳ Bekliyor |
-| 9 | Kullanıcı Yorumları | — | — | ⏳ Bekliyor |
-| 10 | Supabase Entegrasyonu | — | — | ⏳ Bekliyor |
+| 5 | Supabase Dosyaları / Auth Temeli / Kaynak Envanteri | 25.03.2026 | 25.03.2026 | ✅ Tamamlandı |
+| 6 | Araç Veri Yapısı & Entegrasyon | — | — | ⏳ Bekliyor |
+| 7 | Arama & Filtreleme Sistemi | — | — | ⏳ Bekliyor |
+| 8 | Araç Detay Sayfaları | — | — | ⏳ Bekliyor |
+| 9 | AI Entegrasyonu | — | — | ⏳ Bekliyor |
+| 10 | Kullanıcı Yorumları | — | — | ⏳ Bekliyor |
 | 11 | Performans Optimizasyonu | — | — | ⏳ Bekliyor |
 | 12 | SEO & Meta Veriler | — | — | ⏳ Bekliyor |
 | 13 | Test & QA | — | — | ⏳ Bekliyor |
@@ -200,6 +200,103 @@ src/app/
     ├── login/page.tsx
     └── register/page.tsx
 ```
+
+---
+
+## Faz 5 — Supabase Dosyaları / Auth Temeli / Kaynak Envanteri
+
+**Tarih:** 25 Mart 2026
+**Amaç:** Supabase bağlantı dosyalarını oluşturmak, auth altyapısını hazırlamak ve zorunlu kaynakları resmi proje kaynağı olarak tanımlamak.
+
+### Yapılanlar
+- [x] Supabase client dosyası oluşturuldu (`lib/supabase/client.ts`)
+- [x] Supabase server dosyası oluşturuldu (`lib/supabase/server.ts`)
+- [x] Supabase middleware dosyası oluşturuldu (`lib/supabase/middleware.ts`)
+- [x] Database types dosyası oluşturuldu (`types/database.ts`)
+- [x] Auth helpers dosyası oluşturuldu (`lib/auth/auth.ts`)
+- [x] Route guard component oluşturuldu (`lib/auth/route-guard.tsx`)
+- [x] Login sayfası Supabase uyumlu hale getirildi
+- [x] Register sayfası Supabase uyumlu hale getirildi
+- [x] `docs/supabase-setup.md` oluşturuldu
+- [x] `docs/architecture.md` güncellendi (zorunlu kaynaklar eklendi)
+
+### ZORUNLU KAYNAKLAR (RESMİ PROJE VERİLERİ)
+
+**⚠️ Bu kaynaklar opsiyonel değildir. Mutlaka kullanılacaktır.**
+
+#### 1. stitch/ Klasörü — UI & Tasarım Referansı
+```
+stitch/
+├── auto_pulse_prd_architecture.html    # PRD ve mimari
+├── stitch/
+│   ├── auto_pulse_dashboard/
+│   │   ├── code.html                   # Dashboard HTML/CSS
+│   │   └── screen.png                  # Dashboard görsel
+│   └── obsidian_kinetic/
+│       └── DESIGN.md                   # Tasarım sistemi
+```
+**Kural:** `stitch/` **ANA UI REFERANSIDIR**.
+
+#### 2. vehiclesdata.txt — Marka/Model/Yıl Ana Veri Kaynağı
+```
+vehiclesdata.txt  # Ham araç marka/model listesi
+```
+**Kural:** `vehiclesdata.txt` **ANA VERİ KAYNAĞIDIR**.
+
+#### 3. car-logos-dataset-master/ — Logo Ana Veri Kaynağı
+```
+car-logos-dataset-master/
+├── logos/data.json      # Tüm marka logo metadata
+├── logos/thumb/         # Thumbnail logolar
+├── logos/optimized/     # Optimize logolar
+└── logos/original/      # Orijinal logolar
+```
+**Kural:** `car-logos-dataset-master/` **ANA LOGO KAYNAĞIDIR**.
+
+### Supabase Dosya Yapısı
+
+```
+src/
+├── lib/
+│   ├── supabase/
+│   │   ├── client.ts       # Browser client (guest mode support)
+│   │   ├── server.ts       # Server client (service role)
+│   │   └── middleware.ts   # Next.js middleware
+│   └── auth/
+│       ├── auth.ts         # Auth helpers (signIn, signUp, signOut)
+│       └── route-guard.tsx # Route guard component
+└── types/
+    └── database.ts         # Database types (Profile, VehicleBrand, vb.)
+```
+
+### Auth Özellikleri
+
+| Özellik | Durum |
+|---------|-------|
+| Email/Password Auth | ✅ Hazır |
+| Guest Mode | ✅ Hazır (Supabase yoksa) |
+| PKCE Flow | ✅ Aktif |
+| Route Guard | ✅ Component hazır |
+| Session Management | ✅ Helper'lar hazır |
+
+### Supabase Tablo Planı
+
+| Tablo | Açıklama |
+|-------|----------|
+| `profiles` | Kullanıcı profilleri |
+| `saved_vehicles` | Kaydedilen araçlar |
+| `compare_lists` | Karşılaştırma listeleri |
+| `compare_list_items` | Karşılaştırma item'ları |
+| `vehicle_brands` | Araç markaları |
+| `vehicle_models` | Araç modelleri |
+| `vehicle_years` | Araç yılları |
+| `brand_logos` | Marka logoları |
+
+### Notlar
+- Guest mode aktif: Supabase yapılandırılmadığında uygulama çalışır
+- Auth sayfaları guest mode durumunda uyarı gösterir
+- `docs/supabase-setup.md` detaylı tablo yapısını içerir
+- `docs/architecture.md` zorunlu kaynakları belgeledi
 
 ---
 

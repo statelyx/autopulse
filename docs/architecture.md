@@ -2,7 +2,7 @@
 
 > **Son Güncelleme:** 25 Mart 2026
 > **Versiyon:** 1.0.0
-> **Durum:** Faz 1 — Repo İskeleti
+> **Durum:** Faz 5 — Supabase Entegrasyonu
 
 ---
 
@@ -19,92 +19,147 @@ Teknik araç verilerini, gerçek kullanıcı yorumlarını ve yapay zeka analizl
 
 ---
 
-## 2. Teknoloji Kararları (Faz 1 — Serverless & Data-Driven)
+## 2. ZORUNLU KAYNAKLAR (RESMİ PROJE VERİLERİ)
+
+Bu proje aşağıdaki yerel kaynakları **resmi veri kaynağı** olarak kullanır.
+Bu kaynaklar opsiyonel değildir, değiştirilemez ve görmezden gelinemez.
+
+### 🎨 stitch/ Klasörü
+**UI & Tasarım Referansı**
+
+```
+stitch/
+├── auto_pulse_prd_architecture.html    # PRD ve mimari dokümanı
+├── stitch/
+│   ├── auto_pulse_dashboard/
+│   │   ├── code.html                   # Dashboard HTML/CSS referansı
+│   │   └── screen.png                  # Dashboard görsel referansı
+│   └── obsidian_kinetic/
+│       └── DESIGN.md                   # Obsidian Kinetic tasarım sistemi
+```
+
+**Kural:** `stitch/` klasöründeki tasarım dosyaları **ANA UI REFERANSIDIR**.
+Tüm UI bileşenleri bu referansa uygun olarak geliştirilmelidir.
+
+### 🚗 vehiclesdata.txt
+**Marka/Model/Yıl Ana Veri Kaynağı**
+
+```
+vehiclesdata.txt  # Ham araç marka/model listesi
+```
+
+**Kural:** `vehiclesdata.txt` **ANA VERİ KAYNAĞIDIR**.
+Tüm marka, model ve yıl bilgileri bu dosyadan normalize edilip kullanılacaktır.
+
+### 🏭 car-logos-dataset-master/ Klasörü
+**Logo Ana Veri Kaynağı**
+
+```
+car-logos-dataset-master/
+├── logos/
+│   ├── data.json           # Tüm marka logo metadata
+│   ├── thumb/              # Thumbnail logolar
+│   ├── optimized/          # Optimize edilmiş logolar
+│   └── original/           # Orijinal logolar
+└── src/                    # Logo işleme script'leri
+```
+
+**Kural:** `car-logos-dataset-master/` **ANA LOGO KAYNAĞIDIR**.
+Tüm marka logoları bu veri setinden alınacaktır.
+
+---
+
+## 3. Teknoloji Kararları
 
 | Katman | Teknoloji | Neden? |
 |--------|-----------|--------|
-| **Framework** | Next.js 14+ (App Router) | SSR/SSG desteği, SEO optimizasyonu, API Routes |
+| **Framework** | Next.js 16+ (App Router) | SSR/SSG desteği, SEO optimizasyonu, API Routes |
 | **Dil** | TypeScript (Strict Mode) | Tip güvenliği, refactoring kolaylığı |
-| **Stil** | Tailwind CSS + Framer Motion | Hızlı prototoplama, akıcı animasyonlar |
-| **Bileşenler** | shadcn/ui (Custom) | Erişilebilir, tutarlı, özelleştirilebilir |
-| **State** | Zustand | Minimal boilerplate, yüksek performans |
-| **Veri** | Local JSON → Supabase | İlk fazda DB bağımlılığı yok |
-| **Mimari** | Service-Adapter Pattern | Veri kaynağı değişikliği kolaylaştırır |
+| **Stil** | Tailwind CSS | Hızlı prototoplama, premium dark tema |
+| **Auth** | Supabase Auth | Email authentication, guest mode |
+| **Veri** | Supabase PostgreSQL | Relation database, real-time |
+| **State** | React State | Basit state yönetimi |
+| **AI** | Hugging Face | AI modelleri |
 
 ---
 
-## 3. Service-Adapter Mimari Deseni
+## 4. Supabase Entegrasyonu
 
+### Client Structure
 ```
-┌─────────────┐     ┌──────────────┐     ┌─────────────────┐
-│  UI Layer   │────▶│  Service     │────▶│  Adapter        │
-│  (React)    │     │  (Business   │     │  (Data Source)   │
-│             │     │   Logic)     │     │                  │
-└─────────────┘     └──────────────┘     └─────────────────┘
-                          │                      │
-                     VehicleService         LocalAdapter
-                     AIService              SupabaseAdapter
-                     ReviewService          NHTSAAdapter
+src/
+├── lib/
+│   ├── supabase/
+│   │   ├── client.ts       # Browser client
+│   │   ├── server.ts       # Server client (Service Role)
+│   │   └── middleware.ts   # Next.js middleware
+│   └── auth/
+│       ├── auth.ts         # Auth helpers
+│       └── route-guard.tsx # Route guard component
+└── types/
+    └── database.ts         # Database types
 ```
 
-### Avantajlar
-- Veri kaynağı değiştiğinde sadece adapter değişir
-- Business logic bağımsız kalır
-- Test edilebilirlik artar
+### Auth Flow
+- **Email/Password:** Standard authentication
+- **Guest Mode:** Supabase yoksa read-only experience
+- **PKCE Flow:** Browser security için
 
 ---
 
-## 4. Veri Akışı
+## 5. Veritabanı Tablo Yapısı
+
+### Core Tables
+| Tablo | Açıklama |
+|-------|----------|
+| `profiles` | Kullanıcı profilleri |
+| `saved_vehicles` | Kaydedilen araçlar |
+| `compare_lists` | Karşılaştırma listeleri |
+| `compare_list_items` | Karşılaştırma item'ları |
+| `vehicle_brands` | Araç markaları |
+| `vehicle_models` | Araç modelleri |
+| `vehicle_years` | Araç yılları |
+| `brand_logos` | Marka logoları |
+
+Detaylı bilgi için [`docs/supabase-setup.md`](docs/supabase-setup.md)
+
+---
+
+## 6. Veri Akışı
 
 ```
-vehiclesdata.txt ──▶ scripts/normalize.ts ──▶ data/normalized/*.json
-                                                      │
-car-logos-dataset ──▶ scripts/import-logos.ts ──▶ Supabase Storage
-                                                      │
-                                              ┌───────┴───────┐
-                                              │  LocalAdapter  │
-                                              └───────┬───────┘
-                                                      │
-                                              ┌───────┴───────┐
-                                              │ VehicleService │
-                                              └───────┬───────┘
-                                                      │
-                                              ┌───────┴───────┐
-                                              │   UI / Pages   │
-                                              └───────────────┘
+┌─────────────────────┐     ┌──────────────────────┐
+│  ZORUNLU KAYNAKLAR  │     │  Supabase Database   │
+├─────────────────────┤     ├──────────────────────┤
+│ vehiclesdata.txt    │────▶│ vehicle_brands       │
+│ car-logos-dataset/  │────▶│ vehicle_models       │
+│ stitch/ (UI Ref)    │     │ vehicle_years        │
+└─────────────────────┘     │ brand_logos          │
+                           └──────────────────────┘
+                                    │
+                           ┌────────▼────────┐
+                           │ VehicleService  │
+                           └────────┬────────┘
+                                    │
+                           ┌────────▼────────┐
+                           │   UI / Pages    │
+                           └─────────────────┘
 ```
 
 ---
 
-## 5. Renk Paleti & Tasarım Sistemi
+## 7. Renk Paleti & Tasarım Sistemi
 
 | Token | Değer | Kullanım |
 |-------|-------|----------|
-| `--bg-primary` | `#0A0A0A` (Obsidian Black) | Ana arka plan |
-| `--accent` | `#FFBF00` (Neon Amber) | Vurgu, CTA, hover |
-| `--surface` | `#2D2D2D` (Graphite) | Kartlar, paneller |
-| `--text-primary` | `#FFFFFF` | Ana metin |
-| `--text-secondary` | `#9CA3AF` | İkincil metin |
-| `--border` | `#374151` | Kenarlıklar |
-| `--success` | `#10B981` | Başarı durumu |
-| `--error` | `#EF4444` | Hata durumu |
+| `--obsidian` | `#0A0A0A` | Ana arka plan |
+| `--graphite` | `#2D2D2D` | Kartlar, paneller |
+| `--gray-cool` | `#9CA3AF` | İkincil metin |
+| `--white` | `#FFFFFF` | Ana metin |
+| `--amber` | `#FFBF00` | Vurgu, CTA, hover |
 
 ---
 
-## 6. Gelecek Planı (Faz 2+)
-
-### Faz 2 — Backend Entegrasyonu
-- **Backend:** NestJS / Fastify (Render üzerinde)
-- **Veritabanı:** PostgreSQL (Prisma ORM) + Redis (Cache)
-- **API:** RESTful + WebSocket (gerçek zamanlı bildirimler)
-
-### Faz 7 — AI Katmanı
-- **AI Servisi:** Python FastAPI mikroservisi
-- **Görevler:** BullMQ iş kuyruğu
-- **Analiz:** Araç karşılaştırma, fiyat tahmini, yorum özeti
-
----
-
-## 7. Dil Kuralı
+## 8. Dil Kuralı
 
 > **Bu projede tüm ajan çıktıları, geliştirme notları, görev açıklamaları ve teknik dokümantasyon her zaman Türkçe tutulacaktır.**

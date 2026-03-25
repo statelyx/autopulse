@@ -223,12 +223,12 @@ Tarayıcıda [http://localhost:3000](http://localhost:3000) adresini aç.
 | **Faz 2** | Vercel Hazırlığı & Deployment Planı | ✅ Tamamlandı |
 | **Faz 3** | Render Uyumlu Backend İskeleti | ✅ Tamamlandı |
 | **Faz 4** | Next.js Temel Uygulama İskeleti / Premium Shell | ✅ Tamamlandı |
-| **Faz 5** | Araç Veri Yapısı & Entegrasyon | ⏳ Bekliyor |
-| **Faz 6** | Arama & Filtreleme Sistemi | ⏳ Bekliyor |
-| **Faz 7** | Araç Detay Sayfaları | ⏳ Bekliyor |
-| **Faz 8** | AI Entegrasyonu | ⏳ Bekliyor |
-| **Faz 9** | Kullanıcı Yorumları | ⏳ Bekliyor |
-| **Faz 10** | Supabase Entegrasyonu | ⏳ Bekliyor |
+| **Faz 5** | Supabase Dosyaları / Auth Temeli / Kaynak Envanteri | ✅ Tamamlandı |
+| **Faz 6** | Araç Veri Yapısı & Entegrasyon | ⏳ Bekliyor |
+| **Faz 7** | Arama & Filtreleme Sistemi | ⏳ Bekliyor |
+| **Faz 8** | Araç Detay Sayfaları | ⏳ Bekliyor |
+| **Faz 9** | AI Entegrasyonu | ⏳ Bekliyor |
+| **Faz 10** | Kullanıcı Yorumları | ⏳ Bekliyor |
 | **Faz 11** | Performans Optimizasyonu | ⏳ Bekliyor |
 | **Faz 12** | SEO & Meta Veriler | ⏳ Bekliyor |
 | **Faz 13** | Test & QA | ⏳ Bekliyor |
