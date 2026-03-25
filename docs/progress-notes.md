@@ -19,10 +19,10 @@
 | 1 | Repo İskeleti & İlk Push | 25.03.2026 | 25.03.2026 | ✅ Tamamlandı |
 | 2 | Vercel Hazırlığı & Deployment Planı | 25.03.2026 | 25.03.2026 | ✅ Tamamlandı |
 | 3 | Render Uyumlu Backend İskeleti | 25.03.2026 | 25.03.2026 | ✅ Tamamlandı |
-| 4 | Temel UI Bileşenleri & Tasarım Sistemi | — | — | ⏳ Bekliyor |
-| 5 | Dashboard & Ana Sayfa | — | — | ⏳ Bekliyor |
-| 6 | Araç Detay Sayfaları | — | — | ⏳ Bekliyor |
-| 7 | Arama & Filtreleme | — | — | ⏳ Bekliyor |
+| 4 | Next.js Temel Uygulama İskeleti / Premium Shell | 25.03.2026 | 25.03.2026 | ✅ Tamamlandı |
+| 5 | Araç Veri Yapısı & Entegrasyon | — | — | ⏳ Bekliyor |
+| 6 | Arama & Filtreleme Sistemi | — | — | ⏳ Bekliyor |
+| 7 | Araç Detay Sayfaları | — | — | ⏳ Bekliyor |
 | 8 | AI Entegrasyonu | — | — | ⏳ Bekliyor |
 | 9 | Kullanıcı Yorumları | — | — | ⏳ Bekliyor |
 | 10 | Supabase Entegrasyonu | — | — | ⏳ Bekliyor |
@@ -135,6 +135,71 @@ RENDER_INTERNAL_API_URL
 - Render health check path: `/api/health`
 - Vercel ve Render aynı kod tabanını deploy eder
 - `.env.local` local development içindir, git'e push edilmez
+
+---
+
+## Faz 4 — Next.js Temel Uygulama İskeleti / Premium Shell
+
+**Tarih:** 25 Mart 2026
+**Amaç:** Premium dark tema shell yapısını oluşturmak ve tüm route'ları açmak.
+
+### Yapılanlar
+- [x] RootLayout güncellendi (metadata, font, tema)
+- [x] Global CSS güncellendi (Obsidian Black + Neon Amber tema)
+- [x] MainLayout bileşeni oluşturuldu
+- [x] Sidebar bileşeni oluşturuldu
+- [x] TopNav bileşeni oluşturuldu
+- [x] Tüm route'lar oluşturuldu:
+  - `/` — Ana Sayfa (Hero + Quick Actions)
+  - `/dashboard` — Dashboard (İstatistik kartları)
+  - `/discover` — Keşfet (Marka grid)
+  - `/search` — Araç Arama
+  - `/compare` — Karşılaştır (3 slot)
+  - `/issues` — Sorunlar (List)
+  - `/saved` — Kayıtlı (Empty state)
+  - `/vin` — VIN Sorgu
+  - `/about` — Hakkında
+  - `/auth/login` — Giriş
+  - `/auth/register` — Kayıt
+
+### Tema Renk Paleti
+
+| Renk | Değer | Kullanım |
+|------|-------|----------|
+| **Obsidian Black** | `#0A0A0A` | Ana arka plan |
+| **Graphite** | `#2D2D2D` | Kartlar & yüzeyler |
+| **Cool Gray** | `#9CA3AF` | İkincil metinler |
+| **Pure White** | `#FFFFFF` | Birincil metinler |
+| **Neon Amber** | `#FFBF00` | Vurgu & CTA |
+
+### Shell Yapısı
+
+```
+components/layout/
+├── MainLayout.tsx    # Ana layout wrapper
+├── Sidebar.tsx       # Sol navigation (64px width)
+└── TopNav.tsx        # Üst navigation bar
+```
+
+### Route Yapısı
+
+```
+src/app/
+├── page.tsx              # Ana Sayfa
+├── layout.tsx            # Root Layout
+├── globals.css           # Global Styles
+├── dashboard/page.tsx
+├── discover/page.tsx
+├── search/page.tsx
+├── compare/page.tsx
+├── issues/page.tsx
+├── saved/page.tsx
+├── vin/page.tsx
+├── about/page.tsx
+└── auth/
+    ├── login/page.tsx
+    └── register/page.tsx
+```
 
 ---
 

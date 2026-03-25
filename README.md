@@ -164,6 +164,24 @@ curl https://autopulse.vercel.app/api/env-check
 
 ---
 
+## 🛣️ Uygulama Route'ları
+
+| Route | Açıklama |
+|-------|----------|
+| `/` | Ana Sayfa — Hero bölümü ve quick actions |
+| `/dashboard` | Dashboard — İstatistikler ve özet |
+| `/discover` | Keşfet — Marka ve modeller |
+| `/search` | Araç Arama — Gelişmiş arama |
+| `/compare` | Karşılaştır — Araç karşılaştırma |
+| `/issues` | Sorunlar — Bilinen araç sorunları |
+| `/saved` | Kayıtlı — Kaydedilen araçlar |
+| `/vin` | VIN Sorgu — Şasi numarası sorgulama |
+| `/about` | Hakkında — Proje bilgileri |
+| `/auth/login` | Giriş — Kullanıcı girişi |
+| `/auth/register` | Kayıt — Yeni hesap oluşturma |
+
+---
+
 ## 🏁 Hızlı Başlangıç
 
 ```bash
@@ -204,10 +222,10 @@ Tarayıcıda [http://localhost:3000](http://localhost:3000) adresini aç.
 | **Faz 1** | Repo İskeleti & İlk Push | ✅ Tamamlandı |
 | **Faz 2** | Vercel Hazırlığı & Deployment Planı | ✅ Tamamlandı |
 | **Faz 3** | Render Uyumlu Backend İskeleti | ✅ Tamamlandı |
-| **Faz 4** | Temel UI Bileşenleri & Tasarım Sistemi | ⏳ Bekliyor |
-| **Faz 5** | Dashboard & Ana Sayfa | ⏳ Bekliyor |
-| **Faz 6** | Araç Detay Sayfaları | ⏳ Bekliyor |
-| **Faz 7** | Arama & Filtreleme | ⏳ Bekliyor |
+| **Faz 4** | Next.js Temel Uygulama İskeleti / Premium Shell | ✅ Tamamlandı |
+| **Faz 5** | Araç Veri Yapısı & Entegrasyon | ⏳ Bekliyor |
+| **Faz 6** | Arama & Filtreleme Sistemi | ⏳ Bekliyor |
+| **Faz 7** | Araç Detay Sayfaları | ⏳ Bekliyor |
 | **Faz 8** | AI Entegrasyonu | ⏳ Bekliyor |
 | **Faz 9** | Kullanıcı Yorumları | ⏳ Bekliyor |
 | **Faz 10** | Supabase Entegrasyonu | ⏳ Bekliyor |
