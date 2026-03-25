@@ -23,14 +23,15 @@
 | 5 | Supabase Dosyaları / Auth Temeli / Kaynak Envanteri | 25.03.2026 | 25.03.2026 | ✅ Tamamlandı |
 | 6 | Veri Kaynakları / Normalization / vehiclesdata.txt Entegrasyonu | 25.03.2026 | 25.03.2026 | ✅ Tamamlandı |
 | 7 | Etkileşim / Route / Tüm Butonlar Aktif | 25.03.2026 | 25.03.2026 | ✅ Tamamlandı |
-| 8 | Arama & Filtreleme Sistemi | — | — | ⏳ Bekliyor |
-| 9 | Araç Detay Sayfaları | — | — | ⏳ Bekliyor |
-| 10 | AI Entegrasyonu | — | — | ⏳ Bekliyor |
-| 11 | Kullanıcı Yorumları | — | — | ⏳ Bekliyor |
-| 12 | Performans Optimizasyonu | — | — | ⏳ Bekliyor |
-| 13 | SEO & Meta Veriler | — | — | ⏳ Bekliyor |
-| 14 | Test & QA | — | — | ⏳ Bekliyor |
-| 15 | Production Deploy | — | — | ⏳ Bekliyor |
+| 8 | Dil Sistemi / TR-EN Butonu / Light-Dark Tema | 25.03.2026 | 25.03.2026 | ✅ Tamamlandı |
+| 9 | Arama & Filtreleme Sistemi | — | — | ⏳ Bekliyor |
+| 10 | Araç Detay Sayfaları | — | — | ⏳ Bekliyor |
+| 11 | AI Entegrasyonu | — | — | ⏳ Bekliyor |
+| 12 | Kullanıcı Yorumları | — | — | ⏳ Bekliyor |
+| 13 | Performans Optimizasyonu | — | — | ⏳ Bekliyor |
+| 14 | SEO & Meta Veriler | — | — | ⏳ Bekliyor |
+| 15 | Test & QA | — | — | ⏳ Bekliyor |
+| 16 | Production Deploy | — | — | ⏳ Bekliyor |
 
 ---
 
@@ -596,6 +597,183 @@ src/components/dashboard/
 - Active state indicator navbar ve sidebar'da çalışıyor
 - 404 route kalmadı — tüm route'lar aktif
 - Client-side navigation (Link component) ile hızlı geçişler
+
+---
+
+## Faz 8 — Dil Sistemi / TR-EN Butonu / Light-Dark Tema
+
+**Tarih:** 25 Mart 2026
+**Amaç:** Sitenin varsayılan dilini Türkçe yapmak, TR/EN dil butonu eklemek ve light/dark tema sistemi kurmak.
+
+### Yapılanlar
+
+#### 1. Dil Sistemi (i18n)
+- [x] **LanguageThemeContext** oluşturuldu (`src/contexts/LanguageThemeContext.tsx`)
+  - Dil state management (useState)
+  - Tema state management
+  - LocalStorage ile kalıcı tercih saklama
+  - toggleLanguage ve toggleTheme fonksiyonları
+
+- [x] **translations.ts** oluşturuldu (`src/lib/i18n/translations.ts`)
+  - 100+ çeviri anahtarı
+  - Türkçe (tr) ve İngilizce (en) dilleri
+  - useTranslation hook
+  - Tüm ana sayfa metinlerinin çevirisi
+
+#### 2. Dil/Tema Kontrol Paneli
+- [x] **LanguageThemeSwitcher** bileşeni oluşturuldu
+  - TR bayrağı 🇹🇷
+  - EN bayrağı 🇬🇧
+  - Light/Dark tema ikonu
+  - Estetik yuvarlatılmış panel
+  - Navbar'da sağ üstte
+
+#### 3. Varsayılan Dil Ayarı
+- [x] HTML `lang="tr"` olarak ayarlandı
+- [x] Varsayılan dil: Türkçe
+- [x] LocalStorage ile kalıcı tercih
+- [x] Sayfa yenileme sonrası tercih korunuyor
+
+#### 4. Tema Sistemi
+- [x] Light mode CSS değişkenleri
+- [x] Dark mode CSS değişkenleri (korundu)
+- [x] Tailwind `dark` class ile tema değişimi
+- [x] Smooth transitions
+- [x] Tüm renkler tema ile uyumlu değişiyor
+
+#### 5. Güncellenen Bileşenler
+| Bileşen | Değişiklik |
+|---------|-----------|
+| `layout.tsx` | LanguageThemeProvider eklendi |
+| `globals.css` | Light tema değişkenleri eklendi |
+| `TopNavBar.tsx` | Çeviri sistemi + kontrol paneli |
+| `SideNavBar.tsx` | Çeviri sistemi |
+| `HeroSection.tsx` | Çeviri sistemi |
+
+#### 6. Çeviri Kapsamı
+**Çeviri Alanları:**
+- Navbar menüleri
+- Sidebar menüleri
+- Hero bölümü
+- Filtreler
+- Bölüm başlıkları
+- Buton metinleri
+- Boş durum mesajları
+- İstatistikler
+- Rapor başlıkları
+- Ortak metinler (common)
+
+**Çeviri Anahtarı Örnekleri:**
+```
+navHome, navInventory, navIntelligence
+heroTitle, heroSubtitle, heroSearchPlaceholder
+filterManufacturer, filterDesignation, filterEpoch
+sectionMarketClusters, sectionTrendingScores
+inventoryTitle, intelligenceTitle, aiInsightsTitle
+dashboardTitle, compareTitle, savedTitle
+aboutTitle, aboutVision, aboutTechStack
+```
+
+### Teknik Detaylar
+
+#### Context API
+```typescript
+interface LanguageThemeContextType {
+  language: 'tr' | 'en';
+  theme: 'light' | 'dark';
+  setLanguage: (lang: Language) => void;
+  setTheme: (theme: Theme) => void;
+  toggleLanguage: () => void;
+  toggleTheme: () => void;
+}
+```
+
+#### LocalStorage Keys
+- `autopulse-language`: 'tr' | 'en'
+- `autopulse-theme`: 'light' | 'dark'
+
+#### Tema CSS Değişkenleri
+```css
+/* Light Mode (html:not(.dark)) */
+--color-background: #ffffff;
+--color-on-surface: #1c1b1f;
+--color-surface: #f5f5f5;
+
+/* Dark Mode (html.dark) */
+--color-background: #131313;
+--color-on-surface: #e5e2e1;
+--color-surface: #131313;
+```
+
+### Kullanım Örnekleri
+
+#### Bileşende Kullanım
+```typescript
+import { useLanguageTheme } from '@/contexts/LanguageThemeContext';
+import { useTranslation } from '@/lib/i18n/translations';
+
+function MyComponent() {
+  const { language } = useLanguageTheme();
+  const { t } = useTranslation(language);
+
+  return <h1>{t('heroTitle')}</h1>;
+}
+```
+
+### Değişen Dosyalar
+```
+src/
+├── contexts/
+│   └── LanguageThemeContext.tsx   # YENİ
+├── lib/
+│   └── i18n/
+│       └── translations.ts         # YENİ
+├── components/
+│   └── controls/
+│       ├── LanguageThemeSwitcher.tsx  # YENİ
+│       └── index.ts                    # YENİ
+├── app/
+│   ├── layout.tsx                # GÜNCELLENDİ
+│   └── globals.css               # GÜNCELLENDİ
+└── components/dashboard/
+    ├── TopNavBar.tsx             # GÜNCELLENDİ
+    ├── SideNavBar.tsx            # GÜNCELLENDİ
+    └── HeroSection.tsx           # GÜNCELLENDİ
+```
+
+### Commit Bilgileri
+**Commit:** `571ab3f`
+**Mesaj:** faz-8: dil sistemi, tr-en butonu ve light-dark tema
+**Değişen Dosyalar:** 9 dosya
+**Satır Eklendi:** +567 insertions
+**Satır Silindi:** -24 deletions
+
+### Build Durumu
+```bash
+✓ Compiled successfully
+✓ Running TypeScript
+✓ Collecting page data
+✓ Generating static pages (17 routes)
+```
+
+### Özellikler Özeti
+| Özellik | Durum |
+|---------|-------|
+| Varsayılan Dil | 🇹🇷 Türkçe |
+| Dil Değiştirme | ✅ TR/EN butonu |
+| Tema Değiştirme | ✅ Light/Dark butonu |
+| LocalStorage | ✅ Kalıcı tercih |
+| Çeviri Sayısı | 100+ anahtar |
+| Smooth Transition | ✅ Tema geçişi |
+| Bayrak İkonu | ✅ 🇹🇷 🇬🇧 |
+| Material İkon | ✅ Tema ikonu |
+
+### Notlar
+- Varsayılan dil Türkçe (TR) olarak ayarlandı
+- Dil ve tercihi LocalStorage'da saklanıyor
+- Tema değişimi tüm sayfada uniform çalışıyor
+- Stitch tasarımı korundu
+- Tüm metinler çeviriye uygun hale getirildi
 
 ---
 
