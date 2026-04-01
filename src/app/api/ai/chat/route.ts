@@ -77,7 +77,9 @@ export async function POST(request: NextRequest) {
         role: 'user',
         content: [
           `Kullanıcı sorusu: ${message}`,
-          `Katalog eşleşmeleri: ${catalog.vehicles.slice(0, 5).map((vehicle) => `${vehicle.brand} ${vehicle.model} ${vehicle.year}, ${vehicle.fuelType}, ${vehicle.bodyType}, ${vehicle.horsepower} hp, ${formatTryPrice(vehicle.price)}`).join(' | ') || 'eşleşme yok'}`,
+          catalog.vehicles.length > 0
+            ? `Katalog eşleşmeleri: ${catalog.vehicles.slice(0, 5).map((vehicle) => `${vehicle.brand} ${vehicle.model} ${vehicle.year}, ${vehicle.fuelType}, ${vehicle.bodyType}, ${vehicle.horsepower} hp, ${formatTryPrice(vehicle.price)}`).join(' | ')}`
+            : 'Katalogta doğrudan eşleşme yok. Yine de genel otomotiv bilginle kısa ve faydalı cevap ver; markayı veya modeli tanıyorsan açıkla, tanımıyorsan bunu dürüstçe belirt.',
         ].join('\n'),
       },
     ]);

@@ -50,7 +50,7 @@ export class HuggingFaceProvider implements AIProviderInterface {
   }
 
   private getChatModel() {
-    return process.env.HUGGINGFACE_CHAT_MODEL || 'Qwen/Qwen2.5-7B-Instruct-1M';
+    return process.env.HUGGINGFACE_CHAT_MODEL || 'openai/gpt-oss-120b:fastest';
   }
 
   private getAtomicBaseUrl() {
@@ -311,7 +311,7 @@ export class HuggingFaceProvider implements AIProviderInterface {
         model: this.getChatModel(),
         messages,
         temperature: 0.2,
-        max_tokens: 260,
+        max_tokens: 320,
       }),
       cache: 'no-store',
     });
