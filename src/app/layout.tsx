@@ -3,6 +3,7 @@ import { Inter, Space_Grotesk } from 'next/font/google';
 
 import './globals.css';
 
+import { AIChatWidget } from '@/components/ai/AIChatWidget';
 import { LanguageThemeProvider } from '@/contexts/LanguageThemeContext';
 
 const inter = Inter({
@@ -35,7 +36,10 @@ export default function RootLayout({
         />
       </head>
       <body className={`${inter.variable} ${spaceGrotesk.variable} antialiased selection:bg-primary-container selection:text-on-primary-container`}>
-        <LanguageThemeProvider>{children}</LanguageThemeProvider>
+        <LanguageThemeProvider>
+          {children}
+          <AIChatWidget />
+        </LanguageThemeProvider>
       </body>
     </html>
   );

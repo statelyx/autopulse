@@ -9,6 +9,7 @@ import { useLanguageTheme } from '@/contexts/LanguageThemeContext';
 import { useSavedVehicles } from '@/hooks/useLocalStorage';
 import { useVehicle } from '@/hooks/useCatalog';
 import { getBrandLogo } from '@/lib/data/logo-service';
+import { buildVehicleVisualReferences } from '@/lib/data/vehicle-visuals';
 
 export default function VehicleDetailPage() {
   const { language } = useLanguageTheme();
@@ -18,6 +19,7 @@ export default function VehicleDetailPage() {
   const [savedVehicles, setSavedVehicles] = useSavedVehicles();
 
   const isSaved = vehicle ? savedVehicles.includes(vehicle.id) : false;
+  const visualReferences = vehicle ? buildVehicleVisualReferences(vehicle) : [];
 
   const handleSave = () => {
     if (!vehicle) return;
@@ -35,12 +37,12 @@ export default function VehicleDetailPage() {
       <>
         <TopNavBar />
         <SideNavBar />
-        <main className="md:ml-64 pt-16 min-h-screen">
-          <div className="max-w-7xl mx-auto px-8 py-12">
+        <main className="min-h-screen pt-16 md:ml-64">
+          <div className="mx-auto max-w-7xl px-8 py-12">
             <div className="animate-pulse space-y-6">
-              <div className="h-8 bg-surface-container rounded w-1/3" />
-              <div className="h-4 bg-surface-container rounded w-1/2" />
-              <div className="h-96 bg-surface-container rounded-xl" />
+              <div className="h-8 w-1/3 rounded bg-surface-container" />
+              <div className="h-4 w-1/2 rounded bg-surface-container" />
+              <div className="h-96 rounded-xl bg-surface-container" />
             </div>
           </div>
         </main>
@@ -53,18 +55,18 @@ export default function VehicleDetailPage() {
       <>
         <TopNavBar />
         <SideNavBar />
-        <main className="md:ml-64 pt-16 min-h-screen">
-          <div className="max-w-7xl mx-auto px-8 py-12">
+        <main className="min-h-screen pt-16 md:ml-64">
+          <div className="mx-auto max-w-7xl px-8 py-12">
             <div className="flex flex-col items-center justify-center py-24">
-              <div className="w-24 h-24 rounded-full bg-surface-container-highest flex items-center justify-center mb-8">
-                <span className="material-symbols-outlined text-on-surface/40 text-5xl">error</span>
+              <div className="mb-8 flex h-24 w-24 items-center justify-center rounded-full bg-surface-container-highest">
+                <span className="material-symbols-outlined text-5xl text-on-surface/40">error</span>
               </div>
-              <h2 className="font-headline text-2xl font-bold text-on-surface uppercase mb-4 text-center">
+              <h2 className="mb-4 text-center font-headline text-2xl font-bold uppercase text-on-surface">
                 {language === 'tr' ? 'Araç bulunamadı' : 'Vehicle not found'}
               </h2>
               <Link
                 href="/inventory"
-                className="px-6 py-3 bg-primary-container text-on-primary-fixed font-headline font-bold uppercase text-xs rounded-lg hover:brightness-110 transition-all"
+                className="rounded-lg bg-primary-container px-6 py-3 text-xs font-bold uppercase text-on-primary-fixed transition-all hover:brightness-110"
               >
                 {language === 'tr' ? 'Envantere dön' : 'Back to inventory'}
               </Link>
@@ -80,11 +82,11 @@ export default function VehicleDetailPage() {
       <TopNavBar />
       <SideNavBar />
 
-      <main className="md:ml-64 pt-16 min-h-screen">
-        <div className="max-w-7xl mx-auto px-8 py-12">
+      <main className="min-h-screen pt-16 md:ml-64">
+        <div className="mx-auto max-w-7xl px-8 py-12">
           <Link
             href="/inventory"
-            className="inline-flex items-center gap-2 text-on-surface-variant hover:text-on-surface transition-colors mb-8"
+            className="mb-8 inline-flex items-center gap-2 text-on-surface-variant transition-colors hover:text-on-surface"
           >
             <span className="material-symbols-outlined">arrow_back</span>
             <span className="font-label text-[10px] uppercase tracking-widest">
@@ -92,27 +94,25 @@ export default function VehicleDetailPage() {
             </span>
           </Link>
 
-          <div className="mb-8">
-            <div className="flex flex-wrap items-start justify-between gap-4 mb-4">
-              <div className="flex items-center gap-4">
-                <div className="w-16 h-16 bg-surface-container rounded-xl flex items-center justify-center">
+          <div className="mb-8 rounded-[32px] border border-white/10 bg-[radial-gradient(circle_at_top_right,rgba(255,176,0,0.14),transparent_24%),#14110f] p-8">
+            <div className="flex flex-wrap items-start justify-between gap-5">
+              <div className="flex items-center gap-5">
+                <div className="flex h-20 w-20 items-center justify-center rounded-[24px] bg-surface-container">
                   <Image
                     src={getBrandLogo(vehicle.brandSlug)}
                     alt={vehicle.brand}
                     width={64}
                     height={64}
-                    className="w-12 h-12 object-contain"
+                    className="h-12 w-12 object-contain"
                   />
                 </div>
                 <div>
-                  <h1 className="font-headline text-3xl font-black text-on-surface uppercase tracking-tighter mb-1">
+                  <h1 className="font-headline text-4xl font-black uppercase tracking-tight text-on-surface">
                     {vehicle.brand}
                   </h1>
-                  <p className="font-body text-on-surface-variant text-lg">
-                    {vehicle.model}
-                  </p>
-                  <p className="font-body text-on-surface-variant/70 text-sm mt-1">
-                    {vehicle.segment} · {vehicle.bodyType} · {vehicle.fuelType}
+                  <p className="mt-1 text-lg text-on-surface-variant">{vehicle.model}</p>
+                  <p className="mt-2 text-sm text-on-surface-variant/70">
+                    {vehicle.segment} · {vehicle.bodyType} · {vehicle.fuelType} · {vehicle.year}
                   </p>
                 </div>
               </div>
@@ -120,74 +120,104 @@ export default function VehicleDetailPage() {
               <div className="flex gap-3">
                 <button
                   onClick={handleSave}
-                  className="px-4 py-2 bg-surface-container text-on-surface font-label text-[10px] uppercase tracking-widest rounded-lg hover:bg-surface-container-high transition-all"
+                  className="rounded-full border border-white/10 bg-white/5 px-5 py-3 text-[11px] uppercase tracking-[0.24em] text-on-surface transition hover:bg-white/10"
                 >
-                  <span className="material-symbols-outlined text-sm align-middle mr-1">
-                    {isSaved ? 'bookmark_added' : 'bookmark'}
-                  </span>
                   {isSaved ? (language === 'tr' ? 'Kaydedildi' : 'Saved') : (language === 'tr' ? 'Kaydet' : 'Save')}
                 </button>
                 <button
                   onClick={() => router.push(`/compare?add=${vehicle.id}`)}
-                  className="px-4 py-2 bg-surface-container text-on-surface font-label text-[10px] uppercase tracking-widest rounded-lg hover:bg-surface-container-high transition-all"
+                  className="rounded-full bg-primary-container px-5 py-3 text-[11px] uppercase tracking-[0.24em] text-on-primary-fixed transition hover:brightness-105"
                 >
-                  <span className="material-symbols-outlined text-sm align-middle mr-1">compare</span>
                   {language === 'tr' ? 'Karşılaştır' : 'Compare'}
                 </button>
               </div>
             </div>
-
-            <div className="flex items-center gap-4 text-on-surface-variant text-sm">
-              <span className="px-3 py-1 bg-surface-container-lowest rounded-full font-label text-[10px] uppercase tracking-widest">
-                {vehicle.year}
-              </span>
-              <span>•</span>
-              <span>{vehicle.transmission}</span>
-              <span>•</span>
-              <span>Güven {vehicle.confidence}%</span>
-            </div>
           </div>
 
-          <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
-            <div className="lg:col-span-2 space-y-6">
-              <div className="bg-surface-container rounded-xl overflow-hidden h-96 flex items-center justify-center relative">
+          <div className="grid grid-cols-1 gap-8 lg:grid-cols-3">
+            <div className="space-y-6 lg:col-span-2">
+              <div className="relative flex h-96 items-center justify-center overflow-hidden rounded-[32px] border border-white/10 bg-[linear-gradient(180deg,#1c1712,#0f0d0b)]">
                 <Image
                   src={getBrandLogo(vehicle.brandSlug)}
                   alt={vehicle.brand}
                   width={220}
                   height={220}
-                  className="w-52 h-52 object-contain opacity-30"
+                  className="h-52 w-52 object-contain opacity-30"
                 />
                 <div className="absolute inset-0 flex items-center justify-center">
                   <span className="material-symbols-outlined text-9xl text-on-surface/10">directions_car</span>
                 </div>
+                <div className="absolute bottom-6 left-6 rounded-full border border-white/10 bg-black/20 px-4 py-2 text-xs uppercase tracking-[0.25em] text-stone-300">
+                  Güven {vehicle.confidence}%
+                </div>
               </div>
 
-              <div className="bg-surface-container-low rounded-xl p-6">
-                <h3 className="font-headline text-lg font-bold text-on-surface uppercase mb-3">
+              <div className="rounded-[28px] bg-surface-container-low p-6">
+                <h3 className="mb-3 font-headline text-lg font-bold uppercase text-on-surface">
                   {language === 'tr' ? 'Genel değerlendirme' : 'Overview'}
                 </h3>
-                <p className="font-body text-on-surface-variant">{vehicle.description}</p>
+                <p className="text-on-surface-variant">{vehicle.description}</p>
               </div>
 
-              <div className="bg-surface-container-low rounded-xl p-6">
-                <h3 className="font-headline text-lg font-bold text-on-surface uppercase mb-4">
+              <div className="rounded-[28px] bg-surface-container-low p-6">
+                <h3 className="mb-4 font-headline text-lg font-bold uppercase text-on-surface">
                   {language === 'tr' ? 'Donanım ve öne çıkanlar' : 'Features'}
                 </h3>
-                <div className="grid grid-cols-2 gap-3">
+                <div className="grid grid-cols-1 gap-3 md:grid-cols-2">
                   {vehicle.features.map((feature) => (
-                    <div key={feature} className="flex items-center gap-2 text-on-surface-variant text-sm">
-                      <span className="material-symbols-outlined text-primary text-sm">check_circle</span>
+                    <div key={feature} className="flex items-center gap-2 text-sm text-on-surface-variant">
+                      <span className="material-symbols-outlined text-sm text-primary">check_circle</span>
                       <span>{feature}</span>
                     </div>
+                  ))}
+                </div>
+              </div>
+
+              <div className="rounded-[28px] bg-surface-container-low p-6">
+                <div className="mb-4">
+                  <h3 className="font-headline text-lg font-bold uppercase text-on-surface">
+                    {language === 'tr' ? 'Görsel referanslar' : 'Visual references'}
+                  </h3>
+                  <p className="mt-1 text-sm text-on-surface-variant">
+                    {language === 'tr'
+                      ? 'Google Görseller aramasına hızlı geçiş için örnek arama kartları.'
+                      : 'Quick visual search prompts for Google Images.'}
+                  </p>
+                </div>
+
+                <div className="grid grid-cols-1 gap-4 md:grid-cols-2">
+                  {visualReferences.map((reference) => (
+                    <a
+                      key={reference.id}
+                      href={reference.href}
+                      target="_blank"
+                      rel="noreferrer"
+                      className="group overflow-hidden rounded-2xl border border-outline-variant/10 bg-surface-container-highest transition-all hover:border-primary-container/25"
+                    >
+                      <div className={`relative h-36 bg-gradient-to-br ${reference.accent}`}>
+                        <div className="absolute inset-0 flex items-center justify-center">
+                          <Image
+                            src={getBrandLogo(vehicle.brandSlug)}
+                            alt={vehicle.brand}
+                            width={88}
+                            height={88}
+                            className="h-20 w-20 object-contain opacity-25 transition-opacity group-hover:opacity-40"
+                          />
+                        </div>
+                      </div>
+                      <div className="p-4">
+                        <div className="font-headline text-sm font-bold uppercase text-on-surface">{reference.title}</div>
+                        <div className="mt-2 text-xs text-on-surface-variant">{reference.query}</div>
+                      </div>
+                    </a>
                   ))}
                 </div>
               </div>
             </div>
 
             <div className="space-y-6">
-              <div className="bg-primary-container/10 rounded-xl p-6 border border-primary-container/20">
-                <div className="text-sm font-label uppercase tracking-widest text-primary-container mb-2">
+              <div className="rounded-[28px] border border-primary-container/20 bg-primary-container/10 p-6">
+                <div className="mb-2 text-sm uppercase tracking-widest text-primary-container">
                   {language === 'tr' ? 'Fiyat bandı' : 'Price'}
                 </div>
                 <div className="font-headline text-4xl font-black text-primary-container">
@@ -195,8 +225,8 @@ export default function VehicleDetailPage() {
                 </div>
               </div>
 
-              <div className="bg-surface-container-low rounded-xl p-6">
-                <h3 className="font-headline text-lg font-bold text-on-surface uppercase mb-4">
+              <div className="rounded-[28px] bg-surface-container-low p-6">
+                <h3 className="mb-4 font-headline text-lg font-bold uppercase text-on-surface">
                   {language === 'tr' ? 'Teknik profil' : 'Specifications'}
                 </h3>
 
@@ -211,26 +241,26 @@ export default function VehicleDetailPage() {
                     { label: language === 'tr' ? 'Koltuk' : 'Seats', value: String(vehicle.seats) },
                     { label: language === 'tr' ? 'Renk' : 'Color', value: vehicle.color },
                   ].map((item) => (
-                    <div key={item.label} className="flex justify-between items-center py-2 border-b border-outline-variant/10 last:border-b-0">
-                      <span className="text-on-surface-variant text-sm">{item.label}</span>
+                    <div key={item.label} className="flex items-center justify-between border-b border-outline-variant/10 py-2 last:border-b-0">
+                      <span className="text-sm text-on-surface-variant">{item.label}</span>
                       <span className="font-headline font-bold text-on-surface">{item.value}</span>
                     </div>
                   ))}
                 </div>
               </div>
 
-              <div className="bg-surface-container-low rounded-xl p-6">
-                <h3 className="font-headline text-lg font-bold text-on-surface uppercase mb-4">
+              <div className="rounded-[28px] bg-surface-container-low p-6">
+                <h3 className="mb-4 font-headline text-lg font-bold uppercase text-on-surface">
                   {language === 'tr' ? 'Skorlar' : 'Scores'}
                 </h3>
                 <div className="space-y-3">
                   {Object.entries(vehicle.scores).map(([key, value]) => (
                     <div key={key}>
-                      <div className="flex items-center justify-between mb-1 text-xs uppercase tracking-widest text-on-surface-variant">
+                      <div className="mb-1 flex items-center justify-between text-xs uppercase tracking-widest text-on-surface-variant">
                         <span>{key}</span>
                         <span>{value}</span>
                       </div>
-                      <div className="h-2 rounded-full bg-surface-container-highest overflow-hidden">
+                      <div className="h-2 overflow-hidden rounded-full bg-surface-container-highest">
                         <div className="h-full bg-primary-container" style={{ width: `${value}%` }} />
                       </div>
                     </div>

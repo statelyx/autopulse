@@ -115,33 +115,52 @@ export default function ExplorePage() {
             </div>
           </div>
 
-          <div className="grid grid-cols-2 md:grid-cols-4 lg:grid-cols-6 gap-6">
+          <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-6">
             {(isLoading ? skeletonBrands : filteredBrands).map((brand) => (
               <div key={'slug' in brand ? brand.slug : brand.id}>
                 {'slug' in brand ? (
-                  <Link href={`/inventory?brand=${brand.slug}`} className="group">
-                    <div className="h-36 bg-surface-container rounded-xl flex flex-col items-center justify-center border border-outline-variant/5 group-hover:bg-surface-container-high group-hover:border-primary-container/20 transition-all duration-300 relative overflow-hidden p-4">
-                      <div className="absolute inset-0 bg-primary-container/5 opacity-0 group-hover:opacity-100 transition-opacity" />
-                      <Image
-                        src={brand.logoPath}
-                        alt={brand.name}
-                        width={64}
-                        height={64}
-                        className="relative z-10 w-16 h-16 object-contain group-hover:scale-110 transition-transform"
-                      />
-                      <p className="text-center font-label text-[10px] uppercase tracking-widest text-on-surface group-hover:text-primary transition-colors z-10 mt-3">
-                        {brand.name}
-                      </p>
+                  <div className="group h-full rounded-[28px] border border-outline-variant/10 bg-surface-container p-5 transition-all duration-300 hover:border-primary-container/20 hover:bg-surface-container-high">
+                    <Link href={`/inventory?brand=${brand.slug}`} className="block">
+                      <div className="flex items-center gap-4">
+                        <div className="flex h-16 w-16 items-center justify-center rounded-2xl bg-surface-container-highest">
+                          <Image
+                            src={brand.logoPath}
+                            alt={brand.name}
+                            width={64}
+                            height={64}
+                            className="w-12 h-12 object-contain group-hover:scale-110 transition-transform"
+                          />
+                        </div>
+                        <div>
+                          <p className="font-headline text-lg font-bold uppercase tracking-tight text-on-surface group-hover:text-primary transition-colors">
+                            {brand.name}
+                          </p>
+                          <p className="mt-1 font-body text-xs text-on-surface-variant">
+                            {brand.models.length} {language === 'tr' ? 'model' : 'models'} · {brand.segment}
+                          </p>
+                        </div>
+                      </div>
+                    </Link>
+
+                    <div className="mt-5 flex flex-wrap gap-2">
+                      {brand.models.slice(0, 6).map((modelName) => (
+                        <Link
+                          key={modelName}
+                          href={`/inventory?brand=${brand.slug}&model=${encodeURIComponent(modelName)}`}
+                          className="rounded-full bg-surface-container-highest px-3 py-1.5 text-[11px] uppercase tracking-wider text-on-surface-variant transition hover:bg-primary-container hover:text-on-primary-fixed"
+                        >
+                          {modelName}
+                        </Link>
+                      ))}
                     </div>
-                    <div className="mt-2 text-center">
-                      <p className="font-body text-[10px] text-on-surface-variant/60">
-                        {brand.models.length} {language === 'tr' ? 'model' : 'models'}
-                      </p>
-                      <p className="font-body text-[10px] text-on-surface-variant/50">
-                        {brand.segment}
-                      </p>
+
+                    <div className="mt-5 flex items-center justify-between text-[11px] uppercase tracking-widest text-on-surface-variant/60">
+                      <span>{brand.country}</span>
+                      <Link href={`/inventory?brand=${brand.slug}`} className="text-primary hover:underline">
+                        {language === 'tr' ? 'Araçları aç' : 'Open inventory'}
+                      </Link>
                     </div>
-                  </Link>
+                  </div>
                 ) : (
                   <div className="animate-pulse">
                     <div className="h-36 bg-surface-container rounded-xl" />
