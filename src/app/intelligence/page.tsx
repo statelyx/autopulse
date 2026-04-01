@@ -5,6 +5,7 @@ import Link from 'next/link';
 
 import { SideNavBar, TopNavBar } from '@/components/dashboard';
 import { useCatalog } from '@/hooks/useCatalog';
+import { formatTryPrice } from '@/lib/formatters/currency';
 
 type IssueResponse = {
   issues: Array<{
@@ -94,7 +95,7 @@ export default function IntelligencePage() {
             {[
               { label: 'Toplam kayıt', value: vehicles.length },
               { label: 'Elektrikli araç', value: stats?.electricVehicles ?? 0 },
-              { label: 'Ortalama fiyat', value: `$${(stats?.avgPrice ?? 0).toLocaleString()}` },
+              { label: 'Ortalama fiyat', value: formatTryPrice(stats?.avgPrice ?? 0) },
             ].map((item) => (
               <div key={item.label} className="bg-surface-container-low rounded-xl p-6 border border-outline-variant/10">
                 <div className="font-label text-[10px] uppercase tracking-widest text-on-surface-variant mb-2">

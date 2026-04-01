@@ -10,6 +10,7 @@ import { useLanguageTheme } from '@/contexts/LanguageThemeContext';
 import { useCatalog } from '@/hooks/useCatalog';
 import { useCompareVehicles } from '@/hooks/useLocalStorage';
 import { getBrandLogo } from '@/lib/data/logo-service';
+import { formatTryPrice } from '@/lib/formatters/currency';
 
 function CompareContent() {
   const { language } = useLanguageTheme();
@@ -142,7 +143,7 @@ function CompareContent() {
                       { label: language === 'tr' ? 'Güç' : 'Power', value: `${vehicle.horsepower} hp` },
                       { label: '0-100', value: `${vehicle.acceleration}s` },
                       { label: language === 'tr' ? 'Yakıt' : 'Fuel', value: vehicle.fuelType },
-                      { label: language === 'tr' ? 'Fiyat' : 'Price', value: `$${vehicle.price.toLocaleString()}` },
+                      { label: language === 'tr' ? 'Fiyat' : 'Price', value: formatTryPrice(vehicle.price) },
                     ].map((item) => (
                       <div key={item.label} className="flex justify-between text-sm">
                         <span className="text-on-surface-variant">{item.label}</span>
@@ -199,7 +200,7 @@ function CompareContent() {
                 Fiyat farkı
               </div>
               <p className="font-headline text-lg font-bold text-primary-container">
-                ${Math.abs((filledSlots[0]?.price ?? 0) - (filledSlots[1]?.price ?? 0)).toLocaleString()}
+                {formatTryPrice(Math.abs((filledSlots[0]?.price ?? 0) - (filledSlots[1]?.price ?? 0)))}
               </p>
             </div>
             <div className="p-4 bg-surface-container-highest rounded-lg">

@@ -6,6 +6,11 @@
 // AI Provider tipleri
 export type AIProvider = 'huggingface';
 
+export interface ChatMessage {
+  role: 'system' | 'user' | 'assistant';
+  content: string;
+}
+
 // AI model tipleri
 export type AIModel =
   | 'sentiment-analysis'
@@ -53,6 +58,7 @@ export interface AIProviderInterface {
   analyzeSentiment(text: string): Promise<SentimentResult>;
   classifyText(text: string, labels: string[]): Promise<ClassificationResult[]>;
   generateSummary(text: string): Promise<string>;
+  generateChatCompletion(messages: ChatMessage[]): Promise<string>;
   extractFeatures(text: string): Promise<number[]>;
   isConfigured(): boolean;
 }

@@ -10,6 +10,7 @@ import { useSavedVehicles } from '@/hooks/useLocalStorage';
 import { useVehicle } from '@/hooks/useCatalog';
 import { getBrandLogo } from '@/lib/data/logo-service';
 import { buildVehicleVisualReferences } from '@/lib/data/vehicle-visuals';
+import { formatTryPrice } from '@/lib/formatters/currency';
 
 export default function VehicleDetailPage() {
   const { language } = useLanguageTheme();
@@ -221,7 +222,7 @@ export default function VehicleDetailPage() {
                   {language === 'tr' ? 'Fiyat bandı' : 'Price'}
                 </div>
                 <div className="font-headline text-4xl font-black text-primary-container">
-                  ${vehicle.price.toLocaleString()}
+                  {formatTryPrice(vehicle.price)}
                 </div>
               </div>
 

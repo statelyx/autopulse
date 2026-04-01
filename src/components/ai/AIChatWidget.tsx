@@ -3,6 +3,8 @@
 import Link from 'next/link';
 import { useMemo, useState } from 'react';
 
+import { formatTryPrice } from '@/lib/formatters/currency';
+
 type ChatVehicle = {
   id: string;
   brand: string;
@@ -173,7 +175,7 @@ export function AIChatWidget() {
                           {vehicle.brand} {vehicle.model}
                         </div>
                         <div className="mt-1 text-xs text-stone-400">
-                          {vehicle.fuelType} · {vehicle.horsepower} hp · ${vehicle.price.toLocaleString()}
+                          {vehicle.fuelType} · {vehicle.horsepower} hp · {formatTryPrice(vehicle.price)}
                         </div>
                       </Link>
                     ))}

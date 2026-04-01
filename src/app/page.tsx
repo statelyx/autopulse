@@ -2,6 +2,7 @@ import Link from 'next/link';
 
 import { SideNavBar, TopNavBar } from '@/components/dashboard';
 import { getCatalogData } from '@/lib/data/catalog';
+import { formatTryPrice } from '@/lib/formatters/currency';
 
 export default async function HomePage() {
   const { featuredVehicles, stats, brands } = await getCatalogData({ limit: 12 });
@@ -95,7 +96,7 @@ export default async function HomePage() {
                   </div>
                 </div>
                 <div className="mt-8 flex items-center justify-between border-t border-white/10 pt-5">
-                  <span className="text-2xl font-black text-amber-100">${vehicle.price.toLocaleString()}</span>
+                  <span className="text-2xl font-black text-amber-100">{formatTryPrice(vehicle.price)}</span>
                   <span className="text-xs uppercase tracking-[0.25em] text-stone-500">Detaya geç</span>
                 </div>
               </Link>

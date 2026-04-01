@@ -1,5 +1,6 @@
 import type { VehicleInsight } from '../types';
 import { HuggingFaceProvider } from '../providers/huggingface';
+import { formatTryPrice } from '@/lib/formatters/currency';
 
 type BasicVehicle = {
   brand: string;
@@ -64,7 +65,7 @@ export class VehicleAnalyzer {
         id: crypto.randomUUID(),
         type: 'price',
         title: 'Fiyat Segmenti Analizi',
-        summary: `Ortalama fiyat $${avgPrice.toLocaleString()}. Lüks bantta ${luxuryVehicles.length} araç var.`,
+        summary: `Ortalama fiyat ${formatTryPrice(avgPrice)}. Lüks bantta ${luxuryVehicles.length} araç var.`,
         confidence: 88,
         relatedVehicles: luxuryVehicles.slice(0, 3).map((vehicle) => this.getVehicleId(vehicle)),
         impact: avgPrice > 100000 ? 'high' : 'medium',
@@ -112,7 +113,7 @@ export class VehicleAnalyzer {
       id: crypto.randomUUID(),
       type: 'trend',
       title: 'Fiyat Tahmini',
-      summary: `2023+ araçların ortalama fiyatı $${Math.round(avgPrice).toLocaleString()}. Premium oranı %${premiumRatio}.`,
+      summary: `2023+ araçların ortalama fiyatı ${formatTryPrice(Math.round(avgPrice))}. Premium oranı %${premiumRatio}.`,
       confidence: 75,
       relatedVehicles: recentVehicles.slice(0, 3).map((vehicle) => this.getVehicleId(vehicle)),
       impact: 'medium',

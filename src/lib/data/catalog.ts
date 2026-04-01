@@ -3,6 +3,7 @@ import path from 'node:path';
 
 import { getServerClient } from '@/lib/supabase/server';
 import { parseVehiclesData } from '@/lib/data/normalize-vehicles';
+import { toTryPrice } from '@/lib/formatters/currency';
 
 export type CatalogFuelType =
   | 'Benzin'
@@ -60,6 +61,7 @@ export interface CatalogVehicle {
   features: string[];
   source: string[];
   confidence: number;
+  priceSource?: 'estimated-try';
   scores: {
     reliability: number;
     market: number;
@@ -475,12 +477,14 @@ function deriveVehicleFromModel(brand: CatalogBrand, modelName: string): Catalog
     features: buildFeatures(bodyType, fuelType, brand.slug, seed),
     source: [...brand.sources],
     confidence: clamp(72 + (seed % 24), 72, 96),
+    priceSource: 'estimated-try',
     scores,
   };
 
   return {
     ...vehicle,
     ...override,
+    price: toTryPrice(Number(override.price ?? vehicle.price)),
     features: override.features ?? vehicle.features,
     source: Array.from(new Set([...(override.source ?? []), ...vehicle.source])),
     scores: override.scores ?? vehicle.scores,

@@ -2,6 +2,7 @@ import { NextRequest, NextResponse } from 'next/server';
 
 import { HuggingFaceProvider } from '@/lib/ai/providers/huggingface';
 import { buildCatalogSummary, getCatalogData } from '@/lib/data/catalog';
+import { formatTryPrice } from '@/lib/formatters/currency';
 
 function buildFallbackSummary(query: string, vehicles: Awaited<ReturnType<typeof getCatalogData>>['vehicles']) {
   const summary = buildCatalogSummary(vehicles);
@@ -61,11 +62,20 @@ export async function POST(request: NextRequest) {
   try {
     const prompt = [
       `Sorgu: ${query || 'Genel katalog özeti'}`,
-      `Araçlar: ${vehicles.slice(0, 10).map((vehicle) => `${vehicle.brand} ${vehicle.model} ${vehicle.year}, ${vehicle.fuelType}, ${vehicle.price}$`).join(' | ')}`,
+      `Araçlar: ${vehicles.slice(0, 10).map((vehicle) => `${vehicle.brand} ${vehicle.model} ${vehicle.year}, ${vehicle.fuelType}, ${formatTryPrice(vehicle.price)}`).join(' | ')}`,
       'Görev: kısa, Türkçe ve net bir otomotiv analizi özeti üret.',
     ].join('\n');
 
-    summaryText = await provider.generateSummary(prompt);
+    summaryText = await provider.generateChatCompletion([
+      {
+        role: 'system',
+        content: 'Sen kısa ve net Türkçe otomotiv özetleri üreten bir asistansın. Promptu tekrar etme.',
+      },
+      {
+        role: 'user',
+        content: prompt,
+      },
+    ]);
   } catch {
     summaryText = fallback.summaryText;
   }

@@ -9,6 +9,7 @@ import { SideNavBar, TopNavBar } from '@/components/dashboard';
 import { useLanguageTheme } from '@/contexts/LanguageThemeContext';
 import { useCatalog } from '@/hooks/useCatalog';
 import { getBrandLogo } from '@/lib/data/logo-service';
+import { formatTryPrice } from '@/lib/formatters/currency';
 
 function InventoryContent() {
   const { language } = useLanguageTheme();
@@ -62,7 +63,7 @@ function InventoryContent() {
           { label: language === 'tr' ? 'Kayıt' : 'Vehicles', value: vehicles.length },
           { label: language === 'tr' ? 'Marka' : 'Brands', value: stats?.totalBrands ?? 0 },
           { label: language === 'tr' ? 'Elektrikli' : 'Electric', value: stats?.electricVehicles ?? 0 },
-          { label: language === 'tr' ? 'Ortalama Fiyat' : 'Avg Price', value: `$${(stats?.avgPrice ?? 0).toLocaleString()}` },
+          { label: language === 'tr' ? 'Ortalama Fiyat' : 'Avg Price', value: formatTryPrice(stats?.avgPrice ?? 0) },
         ].map((item) => (
           <div key={item.label} className="p-4 rounded-xl bg-surface-container-low border border-outline-variant/10">
             <div className="font-label text-[10px] uppercase tracking-widest text-on-surface-variant mb-2">
@@ -150,7 +151,7 @@ function InventoryContent() {
 
                   <div className="mt-auto pt-4 border-t border-outline-variant/10 flex items-center justify-between">
                     <p className="font-headline text-xl font-bold text-primary">
-                      ${vehicle.price.toLocaleString()}
+                      {formatTryPrice(vehicle.price)}
                     </p>
                     <span className="text-[10px] uppercase tracking-widest text-on-surface-variant">
                       Güven {vehicle.confidence}%
