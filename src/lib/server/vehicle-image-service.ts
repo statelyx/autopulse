@@ -28,6 +28,14 @@ type ImageCandidate = {
   query: string;
 };
 
+type CandidateScoreInput = {
+  brand: string;
+  model: string;
+  year: number;
+  visualId: VehicleVisualId;
+  provider: Exclude<VehicleImageProvider, 'fallback'>;
+};
+
 const NEGATIVE_TERMS = [
   'logo',
   'badge',
@@ -80,14 +88,20 @@ function normalizeText(value: string | undefined) {
   return (value ?? '').toLowerCase();
 }
 
-function scoreCandidate(candidate: ImageCandidate, query: string, visualId: VehicleVisualId) {
+function extractNormalizedTokens(value: string) {
+  return normalizeText(value)
+    .split(/[^a-z0-9]+/g)
+    .map((token) => token.trim())
+    .filter((token) => token.length > 1);
+}
+
+function scoreCandidate(candidate: ImageCandidate, query: string, input: CandidateScoreInput) {
   const haystack = normalizeText(
     [candidate.title, candidate.sourcePageUrl, candidate.imageUrl, query].filter(Boolean).join(' '),
   );
-  const queryTokens = normalizeText(query)
-    .split(/\s+/)
-    .map((token) => token.replace(/[^a-z0-9-]+/g, ''))
-    .filter((token) => token.length > 1);
+  const queryTokens = extractNormalizedTokens(query);
+  const brandTokens = extractNormalizedTokens(input.brand);
+  const modelTokens = extractNormalizedTokens(input.model).filter((token) => !['series', 'class'].includes(token));
 
   let score = 0;
 
@@ -103,10 +117,37 @@ function scoreCandidate(candidate: ImageCandidate, query: string, visualId: Vehi
     }
   }
 
-  for (const slotToken of DETAIL_TOKEN_BOOST[visualId]) {
+  for (const slotToken of DETAIL_TOKEN_BOOST[input.visualId]) {
     if (haystack.includes(slotToken)) {
       score += 7;
     }
+  }
+
+  if (!brandTokens.every((token) => haystack.includes(token))) {
+    score -= 30;
+  } else {
+    score += 10;
+  }
+
+  if (modelTokens.length > 0) {
+    const matchedModelTokens = modelTokens.filter((token) => haystack.includes(token)).length;
+    if (matchedModelTokens === 0) {
+      score -= 35;
+    } else {
+      score += matchedModelTokens * 8;
+    }
+  }
+
+  const yearMatches = Array.from(haystack.matchAll(/\b(19|20)\d{2}\b/g)).map((match) => Number(match[0]));
+  if (yearMatches.length > 0) {
+    if (yearMatches.includes(input.year)) {
+      score += 16;
+    } else {
+      const nearestYearDistance = Math.min(...yearMatches.map((year) => Math.abs(year - input.year)));
+      score -= nearestYearDistance >= 3 ? 18 : 6;
+    }
+  } else if (input.year >= new Date().getFullYear() - 1 && input.provider !== 'serpapi') {
+    score -= 10;
   }
 
   if ((candidate.width ?? 0) >= 1200 || (candidate.height ?? 0) >= 900) {
@@ -123,18 +164,19 @@ function scoreCandidate(candidate: ImageCandidate, query: string, visualId: Vehi
 function pickBestCandidate(
   candidates: ImageCandidate[],
   queries: string[],
-  visualId: VehicleVisualId,
+  input: CandidateScoreInput,
 ) {
   const scored = candidates
     .filter((candidate) => isUsableImageUrl(candidate.imageUrl))
     .map((candidate) => ({
       candidate,
-      score: Math.max(...queries.map((query) => scoreCandidate(candidate, query, visualId))),
+      score: Math.max(...queries.map((query) => scoreCandidate(candidate, query, input))),
     }))
     .sort((left, right) => right.score - left.score);
 
   const best = scored[0];
-  if (!best || best.score < 8) {
+  const minimumScore = input.provider === 'serpapi' ? 14 : 24;
+  if (!best || best.score < minimumScore) {
     return null;
   }
 
@@ -158,7 +200,7 @@ type WikimediaResponse = {
   };
 };
 
-async function searchWikimedia(query: string, visualId: VehicleVisualId) {
+async function searchWikimedia(query: string, input: Omit<CandidateScoreInput, 'provider'>) {
   const url = new URL('https://commons.wikimedia.org/w/api.php');
   url.searchParams.set('action', 'query');
   url.searchParams.set('format', 'json');
@@ -193,7 +235,7 @@ async function searchWikimedia(query: string, visualId: VehicleVisualId) {
       });
   }
 
-  return pickBestCandidate(candidates, [query], visualId);
+  return pickBestCandidate(candidates, [query], { ...input, provider: 'wikimedia' });
 }
 
 type OpenverseResponse = {
@@ -206,7 +248,7 @@ type OpenverseResponse = {
   }>;
 };
 
-async function searchOpenverse(query: string, visualId: VehicleVisualId) {
+async function searchOpenverse(query: string, input: Omit<CandidateScoreInput, 'provider'>) {
   const url = new URL('https://api.openverse.org/v1/images/');
   url.searchParams.set('q', query);
   url.searchParams.set('page_size', '8');
@@ -233,7 +275,7 @@ async function searchOpenverse(query: string, visualId: VehicleVisualId) {
       });
   }
 
-  return pickBestCandidate(candidates, [query], visualId);
+  return pickBestCandidate(candidates, [query], { ...input, provider: 'openverse' });
 }
 
 type SerpApiResponse = {
@@ -248,7 +290,7 @@ type SerpApiResponse = {
   }>;
 };
 
-async function searchSerpApi(query: string, visualId: VehicleVisualId) {
+async function searchSerpApi(query: string, input: Omit<CandidateScoreInput, 'provider'>) {
   const apiKey = process.env.SERPAPI_KEY;
   if (!apiKey) {
     return null;
@@ -283,7 +325,7 @@ async function searchSerpApi(query: string, visualId: VehicleVisualId) {
       });
   }
 
-  return pickBestCandidate(candidates, [query], visualId);
+  return pickBestCandidate(candidates, [query], { ...input, provider: 'serpapi' });
 }
 
 export async function resolveVehicleImage(input: ResolveVehicleImageInput): Promise<ResolvedVehicleImage> {
@@ -298,7 +340,7 @@ export async function resolveVehicleImage(input: ResolveVehicleImageInput): Prom
   );
 
   for (const query of queries) {
-    const wikimediaCandidate = await searchWikimedia(query, input.visualId);
+    const wikimediaCandidate = await searchWikimedia(query, input);
     if (wikimediaCandidate) {
       return {
         id: input.visualId,
@@ -311,7 +353,7 @@ export async function resolveVehicleImage(input: ResolveVehicleImageInput): Prom
   }
 
   for (const query of queries) {
-    const openverseCandidate = await searchOpenverse(query, input.visualId);
+    const openverseCandidate = await searchOpenverse(query, input);
     if (openverseCandidate) {
       return {
         id: input.visualId,
@@ -324,7 +366,7 @@ export async function resolveVehicleImage(input: ResolveVehicleImageInput): Prom
   }
 
   for (const query of queries) {
-    const serpApiCandidate = await searchSerpApi(query, input.visualId);
+    const serpApiCandidate = await searchSerpApi(query, input);
     if (serpApiCandidate) {
       return {
         id: input.visualId,

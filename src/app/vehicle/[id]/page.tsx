@@ -29,6 +29,7 @@ export default function VehicleDetailPage() {
   const { vehicle, isLoading } = useVehicle(params?.id);
   const [savedVehicles, setSavedVehicles] = useSavedVehicles();
   const [resolvedImages, setResolvedImages] = useState<Partial<Record<VehicleVisualId, ResolvedVehicleImage>>>({});
+  const [failedImages, setFailedImages] = useState<Partial<Record<VehicleVisualId, boolean>>>({});
 
   const isSaved = vehicle ? savedVehicles.includes(vehicle.id) : false;
   const inferredPackageName = vehicle ? inferVehiclePackageName(vehicle.model) : undefined;
@@ -48,6 +49,7 @@ export default function VehicleDetailPage() {
   useEffect(() => {
     if (!vehicle) {
       setResolvedImages({});
+      setFailedImages({});
       return;
     }
 
@@ -83,9 +85,11 @@ export default function VehicleDetailPage() {
         ) as Partial<Record<VehicleVisualId, ResolvedVehicleImage>>;
 
         setResolvedImages(nextImages);
+        setFailedImages({});
       } catch (error) {
         if (!(error instanceof DOMException && error.name === 'AbortError')) {
           setResolvedImages({});
+          setFailedImages({});
         }
       }
     }
@@ -268,14 +272,19 @@ export default function VehicleDetailPage() {
                       className="group overflow-hidden rounded-2xl border border-outline-variant/10 bg-surface-container-highest transition-all hover:border-primary-container/25"
                     >
                       <div className={`relative h-36 bg-gradient-to-br ${reference.accent}`}>
-                        {resolvedImages[reference.id]?.imageUrl ? (
+                        {resolvedImages[reference.id]?.imageUrl && !failedImages[reference.id] ? (
                           // eslint-disable-next-line @next/next/no-img-element
                           <img
-                            src={resolvedImages[reference.id]?.imageUrl ?? ''}
+                            src={`/api/vehicle-images/proxy?url=${encodeURIComponent(resolvedImages[reference.id]?.imageUrl ?? '')}`}
                             alt={`${vehicle.brand} ${vehicle.model} ${reference.title}`}
                             className="h-full w-full object-cover transition-transform duration-500 group-hover:scale-105"
                             loading="lazy"
-                            referrerPolicy="no-referrer"
+                            onError={() =>
+                              setFailedImages((current) => ({
+                                ...current,
+                                [reference.id]: true,
+                              }))
+                            }
                           />
                         ) : (
                           <div className="absolute inset-0 flex items-center justify-center">
