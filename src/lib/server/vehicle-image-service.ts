@@ -8,6 +8,7 @@ type ResolveVehicleImageInput = {
   year: number;
   packageName?: string;
   visualId: VehicleVisualId;
+  blockedImageUrls?: string[];
 };
 
 export type ResolvedVehicleImage = {
@@ -37,6 +38,10 @@ type CandidateScoreInput = {
   provider: Exclude<VehicleImageProvider, 'fallback'>;
 };
 
+type CandidateResolveInput = Omit<ResolveVehicleImageInput, 'packageName'> & {
+  packageName?: string;
+};
+
 const NEGATIVE_TERMS = [
   'logo',
   'badge',
@@ -59,6 +64,20 @@ const DETAIL_TOKEN_BOOST: Record<VehicleVisualId, string[]> = {
   rear: ['rear', 'back', 'taillight', 'exterior'],
   interior: ['interior', 'cockpit', 'dashboard', 'cabin'],
   detail: ['detail', 'wheel', 'headlight', 'close', 'grille'],
+};
+
+const REQUIRED_SLOT_TOKENS: Record<VehicleVisualId, string[]> = {
+  front: ['front', 'fascia', 'grille', 'headlight'],
+  rear: ['rear', 'back', 'taillight', 'tailgate'],
+  interior: ['interior', 'cockpit', 'dashboard', 'cabin'],
+  detail: ['detail', 'close', 'wheel', 'headlight', 'taillight', 'grille'],
+};
+
+const CONFLICT_SLOT_TOKENS: Record<VehicleVisualId, string[]> = {
+  front: ['rear', 'back', 'taillight', 'interior', 'cockpit', 'cabin'],
+  rear: ['front', 'fascia', 'grille', 'interior', 'cockpit', 'cabin'],
+  interior: ['front', 'rear', 'taillight', 'grille', 'exterior'],
+  detail: ['interior cockpit', 'rear exterior', 'front exterior'],
 };
 
 async function fetchJson<T>(url: string, init?: RequestInit): Promise<T | null> {
@@ -169,13 +188,37 @@ function scoreCandidate(candidate: ImageCandidate, query: string, input: Candida
   return score;
 }
 
+function passesSlotGate(candidate: ImageCandidate, input: CandidateScoreInput) {
+  const haystack = normalizeText(
+    [candidate.title, candidate.sourcePageUrl, candidate.imageUrl, candidate.query].filter(Boolean).join(' '),
+  );
+
+  const requiredTokens = REQUIRED_SLOT_TOKENS[input.visualId];
+  const conflictTokens = CONFLICT_SLOT_TOKENS[input.visualId];
+
+  const hasRequiredToken = requiredTokens.some((token) => haystack.includes(token));
+  const hasConflictingToken = conflictTokens.some((token) => haystack.includes(token));
+
+  if (input.visualId === 'detail') {
+    return hasRequiredToken;
+  }
+
+  return hasRequiredToken && !hasConflictingToken;
+}
+
 function pickBestCandidate(
   candidates: ImageCandidate[],
   queries: string[],
   input: CandidateScoreInput,
+  blockedImageUrls: string[] = [],
 ) {
   const scored = candidates
-    .filter((candidate) => isUsableImageUrl(candidate.imageUrl) && isUsableMimeType(candidate.mime))
+    .filter((candidate) =>
+      isUsableImageUrl(candidate.imageUrl) &&
+      isUsableMimeType(candidate.mime) &&
+      !blockedImageUrls.includes(candidate.imageUrl) &&
+      passesSlotGate(candidate, input),
+    )
     .map((candidate) => ({
       candidate,
       score: Math.max(...queries.map((query) => scoreCandidate(candidate, query, input))),
@@ -209,7 +252,7 @@ type WikimediaResponse = {
   };
 };
 
-async function searchWikimedia(query: string, input: Omit<CandidateScoreInput, 'provider'>) {
+async function searchWikimedia(query: string, input: CandidateResolveInput) {
   const url = new URL('https://commons.wikimedia.org/w/api.php');
   url.searchParams.set('action', 'query');
   url.searchParams.set('format', 'json');
@@ -246,7 +289,18 @@ async function searchWikimedia(query: string, input: Omit<CandidateScoreInput, '
     });
   }
 
-  return pickBestCandidate(candidates, [query], { ...input, provider: 'wikimedia' });
+  return pickBestCandidate(
+    candidates,
+    [query],
+    {
+      brand: input.brand,
+      model: input.model,
+      year: input.year,
+      visualId: input.visualId,
+      provider: 'wikimedia',
+    },
+    input.blockedImageUrls,
+  );
 }
 
 type OpenverseResponse = {
@@ -259,7 +313,7 @@ type OpenverseResponse = {
   }>;
 };
 
-async function searchOpenverse(query: string, input: Omit<CandidateScoreInput, 'provider'>) {
+async function searchOpenverse(query: string, input: CandidateResolveInput) {
   const url = new URL('https://api.openverse.org/v1/images/');
   url.searchParams.set('q', query);
   url.searchParams.set('page_size', '8');
@@ -287,7 +341,18 @@ async function searchOpenverse(query: string, input: Omit<CandidateScoreInput, '
     });
   }
 
-  return pickBestCandidate(candidates, [query], { ...input, provider: 'openverse' });
+  return pickBestCandidate(
+    candidates,
+    [query],
+    {
+      brand: input.brand,
+      model: input.model,
+      year: input.year,
+      visualId: input.visualId,
+      provider: 'openverse',
+    },
+    input.blockedImageUrls,
+  );
 }
 
 type SerpApiResponse = {
@@ -302,7 +367,7 @@ type SerpApiResponse = {
   }>;
 };
 
-async function searchSerpApi(query: string, input: Omit<CandidateScoreInput, 'provider'>) {
+async function searchSerpApi(query: string, input: CandidateResolveInput) {
   const apiKey = process.env.SERPAPI_KEY;
   if (!apiKey) {
     return null;
@@ -338,7 +403,18 @@ async function searchSerpApi(query: string, input: Omit<CandidateScoreInput, 'pr
     });
   }
 
-  return pickBestCandidate(candidates, [query], { ...input, provider: 'serpapi' });
+  return pickBestCandidate(
+    candidates,
+    [query],
+    {
+      brand: input.brand,
+      model: input.model,
+      year: input.year,
+      visualId: input.visualId,
+      provider: 'serpapi',
+    },
+    input.blockedImageUrls,
+  );
 }
 
 export async function resolveVehicleImage(input: ResolveVehicleImageInput): Promise<ResolvedVehicleImage> {

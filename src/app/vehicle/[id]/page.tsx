@@ -22,6 +22,39 @@ type ResolvedVehicleImage = {
   query: string;
 };
 
+function buildFallbackInsight(
+  visualId: VehicleVisualId,
+  vehicle: NonNullable<ReturnType<typeof useVehicle>['vehicle']>,
+) {
+  switch (visualId) {
+    case 'front':
+      return {
+        label: 'Ön Profil',
+        text: `${vehicle.bodyType} gövde oranı, ön aydınlatma imzası ve marka yüzü bu bölümde öne çıkıyor.`,
+      };
+    case 'rear':
+      return {
+        label: 'Arka Profil',
+        text: `${vehicle.model} arka siluetinde bagaj çizgisi, stop grubu ve omuz hattı karakteri belirleyici.`,
+      };
+    case 'interior':
+      return {
+        label: 'İç Mekan Notu',
+        text: `${vehicle.features.slice(0, 2).join(', ')} gibi donanımlar kabin deneyiminin ana temasını oluşturuyor.`,
+      };
+    case 'detail':
+      return {
+        label: 'Teknik Detay',
+        text: `${vehicle.horsepower} hp güç, ${vehicle.transmission.toLowerCase()} şanzıman ve ${vehicle.fuelType.toLowerCase()} altyapı bu modelin öne çıkan teknik çerçevesi.`,
+      };
+    default:
+      return {
+        label: 'Araç Özeti',
+        text: vehicle.description,
+      };
+  }
+}
+
 export default function VehicleDetailPage() {
   const { language } = useLanguageTheme();
   const params = useParams<{ id: string }>();
@@ -271,8 +304,14 @@ export default function VehicleDetailPage() {
                       rel="noreferrer"
                       className="group overflow-hidden rounded-2xl border border-outline-variant/10 bg-surface-container-highest transition-all hover:border-primary-container/25"
                     >
+                      {(() => {
+                        const fallbackInsight = buildFallbackInsight(reference.id, vehicle);
+                        const hasResolvedImage = Boolean(resolvedImages[reference.id]?.imageUrl) && !failedImages[reference.id];
+
+                        return (
+                          <>
                       <div className={`relative h-36 bg-gradient-to-br ${reference.accent}`}>
-                        {resolvedImages[reference.id]?.imageUrl && !failedImages[reference.id] ? (
+                        {hasResolvedImage ? (
                           // eslint-disable-next-line @next/next/no-img-element
                           <img
                             src={`/api/vehicle-images/proxy?url=${encodeURIComponent(resolvedImages[reference.id]?.imageUrl ?? '')}`}
@@ -287,14 +326,13 @@ export default function VehicleDetailPage() {
                             }
                           />
                         ) : (
-                          <div className="absolute inset-0 flex items-center justify-center">
-                            <Image
-                              src={getBrandLogo(vehicle.brandSlug)}
-                              alt={vehicle.brand}
-                              width={88}
-                              height={88}
-                              className="h-20 w-20 object-contain opacity-25 transition-opacity group-hover:opacity-40"
-                            />
+                          <div className="absolute inset-0 flex flex-col justify-between p-5">
+                            <div className="text-[10px] uppercase tracking-[0.28em] text-stone-300/70">
+                              {fallbackInsight.label}
+                            </div>
+                            <p className="max-w-[26ch] text-sm leading-relaxed text-stone-100/88">
+                              {fallbackInsight.text}
+                            </p>
                           </div>
                         )}
                         <div className="absolute inset-x-0 bottom-0 h-20 bg-gradient-to-t from-black/65 via-black/20 to-transparent" />
@@ -306,6 +344,9 @@ export default function VehicleDetailPage() {
                           {(resolvedImages[reference.id]?.provider ?? 'fallback').replace('openverse', 'openverse free')}
                         </div>
                       </div>
+                          </>
+                        );
+                      })()}
                     </a>
                   ))}
                 </div>

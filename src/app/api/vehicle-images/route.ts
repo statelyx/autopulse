@@ -27,17 +27,25 @@ export async function POST(request: NextRequest) {
     (visualId): visualId is VehicleVisualId => allowedVisualIds.has(visualId),
   );
 
-  const images = await Promise.all(
-    visualIds.map((visualId) =>
-      resolveVehicleImage({
-        brand,
-        model,
-        year,
-        packageName,
-        visualId,
-      }),
-    ),
-  );
+  const images = [];
+  const usedImageUrls = new Set<string>();
+
+  for (const visualId of visualIds) {
+    const resolvedImage = await resolveVehicleImage({
+      brand,
+      model,
+      year,
+      packageName,
+      visualId,
+      blockedImageUrls: Array.from(usedImageUrls),
+    });
+
+    if (resolvedImage.imageUrl) {
+      usedImageUrls.add(resolvedImage.imageUrl);
+    }
+
+    images.push(resolvedImage);
+  }
 
   return NextResponse.json({
     images,
