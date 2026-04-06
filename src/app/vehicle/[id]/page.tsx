@@ -1,5 +1,7 @@
 'use client';
 
+import { useEffect, useMemo, useState } from 'react';
+
 import Image from 'next/image';
 import Link from 'next/link';
 import { useParams, useRouter } from 'next/navigation';
@@ -9,8 +11,16 @@ import { useLanguageTheme } from '@/contexts/LanguageThemeContext';
 import { useSavedVehicles } from '@/hooks/useLocalStorage';
 import { useVehicle } from '@/hooks/useCatalog';
 import { getBrandLogo } from '@/lib/data/logo-service';
-import { buildVehicleVisualReferences } from '@/lib/data/vehicle-visuals';
+import { buildVehicleVisualReferences, inferVehiclePackageName, type VehicleVisualId } from '@/lib/data/vehicle-visuals';
 import { formatTryPrice } from '@/lib/formatters/currency';
+
+type ResolvedVehicleImage = {
+  id: VehicleVisualId;
+  imageUrl: string | null;
+  sourcePageUrl: string | null;
+  provider: 'wikimedia' | 'openverse' | 'serpapi' | 'fallback';
+  query: string;
+};
 
 export default function VehicleDetailPage() {
   const { language } = useLanguageTheme();
@@ -18,9 +28,71 @@ export default function VehicleDetailPage() {
   const router = useRouter();
   const { vehicle, isLoading } = useVehicle(params?.id);
   const [savedVehicles, setSavedVehicles] = useSavedVehicles();
+  const [resolvedImages, setResolvedImages] = useState<Partial<Record<VehicleVisualId, ResolvedVehicleImage>>>({});
 
   const isSaved = vehicle ? savedVehicles.includes(vehicle.id) : false;
-  const visualReferences = vehicle ? buildVehicleVisualReferences(vehicle) : [];
+  const inferredPackageName = vehicle ? inferVehiclePackageName(vehicle.model) : undefined;
+  const visualReferences = useMemo(
+    () =>
+      vehicle
+        ? buildVehicleVisualReferences({
+            brand: vehicle.brand,
+            model: vehicle.model,
+            year: vehicle.year,
+            packageName: inferredPackageName,
+          })
+        : [],
+    [inferredPackageName, vehicle],
+  );
+
+  useEffect(() => {
+    if (!vehicle) {
+      setResolvedImages({});
+      return;
+    }
+
+    const vehiclePayload = {
+      brand: vehicle.brand,
+      model: vehicle.model,
+      year: vehicle.year,
+      packageName: inferredPackageName,
+    };
+    const controller = new AbortController();
+
+    async function loadVehicleImages() {
+      try {
+        const response = await fetch('/api/vehicle-images', {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json',
+          },
+          body: JSON.stringify({
+            ...vehiclePayload,
+            visualIds: visualReferences.map((reference) => reference.id),
+          }),
+          signal: controller.signal,
+        });
+
+        if (!response.ok) {
+          throw new Error('Vehicle images could not be resolved');
+        }
+
+        const data = (await response.json()) as { images?: ResolvedVehicleImage[] };
+        const nextImages = Object.fromEntries(
+          (data.images ?? []).map((image) => [image.id, image]),
+        ) as Partial<Record<VehicleVisualId, ResolvedVehicleImage>>;
+
+        setResolvedImages(nextImages);
+      } catch (error) {
+        if (!(error instanceof DOMException && error.name === 'AbortError')) {
+          setResolvedImages({});
+        }
+      }
+    }
+
+    void loadVehicleImages();
+    return () => controller.abort();
+  }, [inferredPackageName, vehicle, visualReferences]);
 
   const handleSave = () => {
     if (!vehicle) return;
@@ -190,25 +262,40 @@ export default function VehicleDetailPage() {
                   {visualReferences.map((reference) => (
                     <a
                       key={reference.id}
-                      href={reference.href}
+                      href={resolvedImages[reference.id]?.sourcePageUrl ?? reference.href}
                       target="_blank"
                       rel="noreferrer"
                       className="group overflow-hidden rounded-2xl border border-outline-variant/10 bg-surface-container-highest transition-all hover:border-primary-container/25"
                     >
                       <div className={`relative h-36 bg-gradient-to-br ${reference.accent}`}>
-                        <div className="absolute inset-0 flex items-center justify-center">
-                          <Image
-                            src={getBrandLogo(vehicle.brandSlug)}
-                            alt={vehicle.brand}
-                            width={88}
-                            height={88}
-                            className="h-20 w-20 object-contain opacity-25 transition-opacity group-hover:opacity-40"
+                        {resolvedImages[reference.id]?.imageUrl ? (
+                          // eslint-disable-next-line @next/next/no-img-element
+                          <img
+                            src={resolvedImages[reference.id]?.imageUrl ?? ''}
+                            alt={`${vehicle.brand} ${vehicle.model} ${reference.title}`}
+                            className="h-full w-full object-cover transition-transform duration-500 group-hover:scale-105"
+                            loading="lazy"
+                            referrerPolicy="no-referrer"
                           />
-                        </div>
+                        ) : (
+                          <div className="absolute inset-0 flex items-center justify-center">
+                            <Image
+                              src={getBrandLogo(vehicle.brandSlug)}
+                              alt={vehicle.brand}
+                              width={88}
+                              height={88}
+                              className="h-20 w-20 object-contain opacity-25 transition-opacity group-hover:opacity-40"
+                            />
+                          </div>
+                        )}
+                        <div className="absolute inset-x-0 bottom-0 h-20 bg-gradient-to-t from-black/65 via-black/20 to-transparent" />
                       </div>
                       <div className="p-4">
                         <div className="font-headline text-sm font-bold uppercase text-on-surface">{reference.title}</div>
                         <div className="mt-2 text-xs text-on-surface-variant">{reference.query}</div>
+                        <div className="mt-3 text-[10px] uppercase tracking-[0.22em] text-on-surface-variant/60">
+                          {(resolvedImages[reference.id]?.provider ?? 'fallback').replace('openverse', 'openverse free')}
+                        </div>
                       </div>
                     </a>
                   ))}
