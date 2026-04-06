@@ -16,11 +16,11 @@ const supabaseAnonKey = process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY ||
                         '';
 
 // Validate required variables
-if (!supabaseUrl) {
+if (!supabaseUrl && process.env.NODE_ENV === 'development') {
   console.warn('Supabase URL bulunamadı. Guest mode aktif.');
 }
 
-if (!supabaseAnonKey) {
+if (!supabaseAnonKey && process.env.NODE_ENV === 'development') {
   console.warn('Supabase Anon Key bulunamadı. Guest mode aktif.');
 }
 

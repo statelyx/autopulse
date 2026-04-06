@@ -24,6 +24,7 @@ type ImageCandidate = {
   title?: string;
   width?: number;
   height?: number;
+  mime?: string;
   provider: Exclude<VehicleImageProvider, 'fallback'>;
   query: string;
 };
@@ -81,7 +82,14 @@ async function fetchJson<T>(url: string, init?: RequestInit): Promise<T | null> 
 function isUsableImageUrl(url: string | undefined | null) {
   if (!url) return false;
   if (!/^https?:\/\//i.test(url)) return false;
-  return !url.endsWith('.svg');
+  const normalizedUrl = url.toLowerCase();
+  return !['.svg', '.pdf', '.djvu', '.tif', '.tiff', '.webm', '.mp4'].some((extension) => normalizedUrl.includes(extension));
+}
+
+function isUsableMimeType(mime: string | undefined) {
+  if (!mime) return true;
+  const normalizedMime = mime.toLowerCase();
+  return normalizedMime.startsWith('image/') && normalizedMime !== 'image/svg+xml';
 }
 
 function normalizeText(value: string | undefined) {
@@ -167,7 +175,7 @@ function pickBestCandidate(
   input: CandidateScoreInput,
 ) {
   const scored = candidates
-    .filter((candidate) => isUsableImageUrl(candidate.imageUrl))
+    .filter((candidate) => isUsableImageUrl(candidate.imageUrl) && isUsableMimeType(candidate.mime))
     .map((candidate) => ({
       candidate,
       score: Math.max(...queries.map((query) => scoreCandidate(candidate, query, input))),
@@ -194,6 +202,7 @@ type WikimediaResponse = {
           descriptionurl?: string;
           width?: number;
           height?: number;
+          mime?: string;
         }>;
       }
     >;
@@ -210,7 +219,7 @@ async function searchWikimedia(query: string, input: Omit<CandidateScoreInput, '
   url.searchParams.set('gsrsearch', query);
   url.searchParams.set('gsrlimit', '8');
   url.searchParams.set('prop', 'imageinfo');
-  url.searchParams.set('iiprop', 'url|size');
+  url.searchParams.set('iiprop', 'url|size|mime');
 
   const data = await fetchJson<WikimediaResponse>(url.toString(), {
     headers: {
@@ -223,16 +232,18 @@ async function searchWikimedia(query: string, input: Omit<CandidateScoreInput, '
   for (const page of pages) {
     const image = page.imageinfo?.[0];
     if (!image?.url) continue;
+    if (!isUsableMimeType(image.mime) || !isUsableImageUrl(image.url)) continue;
 
     candidates.push({
-        imageUrl: image.url,
-        sourcePageUrl: image.descriptionurl,
-        title: page.title,
-        width: image.width,
-        height: image.height,
-        provider: 'wikimedia' as const,
-        query,
-      });
+      imageUrl: image.url,
+      sourcePageUrl: image.descriptionurl,
+      title: page.title,
+      width: image.width,
+      height: image.height,
+      mime: image.mime,
+      provider: 'wikimedia' as const,
+      query,
+    });
   }
 
   return pickBestCandidate(candidates, [query], { ...input, provider: 'wikimedia' });
@@ -263,16 +274,17 @@ async function searchOpenverse(query: string, input: Omit<CandidateScoreInput, '
   const candidates: ImageCandidate[] = [];
   for (const item of data?.results ?? []) {
     if (!item.url) continue;
+    if (!isUsableImageUrl(item.url)) continue;
 
     candidates.push({
-        imageUrl: item.url,
-        sourcePageUrl: item.foreign_landing_url,
-        title: item.title,
-        width: item.width,
-        height: item.height,
-        provider: 'openverse' as const,
-        query,
-      });
+      imageUrl: item.url,
+      sourcePageUrl: item.foreign_landing_url,
+      title: item.title,
+      width: item.width,
+      height: item.height,
+      provider: 'openverse' as const,
+      query,
+    });
   }
 
   return pickBestCandidate(candidates, [query], { ...input, provider: 'openverse' });
@@ -313,16 +325,17 @@ async function searchSerpApi(query: string, input: Omit<CandidateScoreInput, 'pr
   for (const item of data?.images_results ?? []) {
     const imageUrl = item.original ?? item.thumbnail;
     if (!imageUrl) continue;
+    if (!isUsableImageUrl(imageUrl)) continue;
 
     candidates.push({
-        imageUrl,
-        sourcePageUrl: item.link,
-        title: [item.title, item.source].filter(Boolean).join(' '),
-        width: item.original_width,
-        height: item.original_height,
-        provider: 'serpapi' as const,
-        query,
-      });
+      imageUrl,
+      sourcePageUrl: item.link,
+      title: [item.title, item.source].filter(Boolean).join(' '),
+      width: item.original_width,
+      height: item.original_height,
+      provider: 'serpapi' as const,
+      query,
+    });
   }
 
   return pickBestCandidate(candidates, [query], { ...input, provider: 'serpapi' });
@@ -339,40 +352,21 @@ export async function resolveVehicleImage(input: ResolveVehicleImageInput): Prom
     input.visualId,
   );
 
-  for (const query of queries) {
-    const wikimediaCandidate = await searchWikimedia(query, input);
-    if (wikimediaCandidate) {
-      return {
-        id: input.visualId,
-        imageUrl: wikimediaCandidate.imageUrl,
-        sourcePageUrl: wikimediaCandidate.sourcePageUrl ?? null,
-        provider: wikimediaCandidate.provider,
-        query,
-      };
-    }
-  }
+  const preferSerpApi = input.year >= new Date().getFullYear() - 1;
+  const resolvers = preferSerpApi
+    ? [searchSerpApi, searchWikimedia, searchOpenverse]
+    : [searchWikimedia, searchOpenverse, searchSerpApi];
 
-  for (const query of queries) {
-    const openverseCandidate = await searchOpenverse(query, input);
-    if (openverseCandidate) {
-      return {
-        id: input.visualId,
-        imageUrl: openverseCandidate.imageUrl,
-        sourcePageUrl: openverseCandidate.sourcePageUrl ?? null,
-        provider: openverseCandidate.provider,
-        query,
-      };
-    }
-  }
+  for (const resolver of resolvers) {
+    for (const query of queries) {
+      const candidate = await resolver(query, input);
+      if (!candidate) continue;
 
-  for (const query of queries) {
-    const serpApiCandidate = await searchSerpApi(query, input);
-    if (serpApiCandidate) {
       return {
         id: input.visualId,
-        imageUrl: serpApiCandidate.imageUrl,
-        sourcePageUrl: serpApiCandidate.sourcePageUrl ?? null,
-        provider: serpApiCandidate.provider,
+        imageUrl: candidate.imageUrl,
+        sourcePageUrl: candidate.sourcePageUrl ?? null,
+        provider: candidate.provider,
         query,
       };
     }
